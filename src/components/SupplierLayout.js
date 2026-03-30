@@ -6,7 +6,7 @@ import Topbar from './ui/Topbar';
 
 const SupplierLayout = ({ children }) => {
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [displayName, setDisplayName] = useState('');
   const mobile = (user && (user.phone || user.mobile || user.MobileNo || user.Mobile || user.mobileNo || '')).toString().replace(/\D/g, '');
 
@@ -63,7 +63,7 @@ const SupplierLayout = ({ children }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     window.location.href = '/login';
   };
 

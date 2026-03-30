@@ -25,7 +25,7 @@ export const loginUser = (email, password) => async (dispatch) => {
     if (res.data.StatusCode === 200) {
       const userData = res.data.ResultSet[0];
       dispatch({ type: USER_LOGIN_SUCCESS, payload: userData });
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("user", JSON.stringify(userData));
       return { success: true, user: userData };
     } else {
       dispatch({ type: USER_LOGIN_FAIL, payload: res.data.Result });
@@ -97,7 +97,7 @@ export const verifyOtp = (phone, otp) => async (dispatch) => {
     if (res.data.StatusCode === 200) {
       const userData = res.data.ResultSet[0];
       dispatch({ type: USER_OTP_VERIFY_SUCCESS, payload: userData });
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("user", JSON.stringify(userData));
       localStorage.removeItem('unverifiedUser');
       return { success: true, user: userData };
     } else {

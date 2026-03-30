@@ -4,7 +4,7 @@ import UserService from '../services/UserService';
 import RepairmanService from '../services/RepairmanService';
 
 const AssignedRepairs = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [myRepairs, setMyRepairs] = useState([]);
   const [showPartsModal, setShowPartsModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -112,7 +112,7 @@ const AssignedRepairs = () => {
             if (Array.isArray(cached) && cached.length > 0) {
               const found = cached.find(r => {
                 const names = [r.repairman_name, r.name, r.UserName, r.username, r.displayName].filter(Boolean).map(x => String(x).trim().toLowerCase());
-                return names.includes(String(localStorage.getItem('rep_name') || user?.username || '').trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobile));
+                return names.includes(String(sessionStorage.getItem('rep_name') || user?.username || '').trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobile));
               });
               if (found) {
                 const candidates = [found.RepairmanID, found.RepairmanId, found.repairman_id, found.id];
@@ -138,7 +138,7 @@ const AssignedRepairs = () => {
             }
             const foundSrv = (list || []).find(r => {
               const names = [r.repairman_name, r.name, r.UserName, r.username].filter(Boolean).map(x => String(x).trim().toLowerCase());
-              return names.includes(String(localStorage.getItem('rep_name') || user?.username || '').trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobile));
+              return names.includes(String(sessionStorage.getItem('rep_name') || user?.username || '').trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobile));
             });
             if (foundSrv) {
               const candidates = [foundSrv.RepairmanID, foundSrv.RepairmanId, foundSrv.repairman_id, foundSrv.id];
@@ -156,9 +156,9 @@ const AssignedRepairs = () => {
 
         const fetchRobust = async (endpoint) => {
           let list = [];
-          const userObj = JSON.parse(localStorage.getItem('user') || '{}');
+          const userObj = JSON.parse(sessionStorage.getItem('user') || '{}');
           const username = String(userObj.username || '').trim();
-          const repName = String(localStorage.getItem('rep_name') || '').trim();
+          const repName = String(sessionStorage.getItem('rep_name') || '').trim();
 
           const targets = [];
           if (repairmanId) targets.push(`repairman_id=${repairmanId}`);
@@ -240,7 +240,7 @@ const AssignedRepairs = () => {
             const ticketRepId = String(t.repairman_id || (t.raw && (t.raw.repairman_id || t.raw.RepairmanID || t.raw.RepairmanId)) || '').trim();
             const assigned = String(t.assignedTo || t.repName || t.rep_name || (t.raw && (t.raw.assignedTo || t.raw.assigned_to || t.raw.repairman || t.raw.rep_name || t.raw.repName)) || '').trim().toLowerCase();
             const target = String(user.username || '').trim().toLowerCase();
-            const targetRepName = String(localStorage.getItem('rep_name') || '').trim().toLowerCase();
+            const targetRepName = String(sessionStorage.getItem('rep_name') || '').trim().toLowerCase();
 
             const idMatch = repairmanId && String(ticketRepId) === String(repairmanId);
             const nameMatch = assigned === target || (targetRepName && assigned === targetRepName) || (assigned !== '' && target.includes(assigned)) || (target !== '' && assigned.includes(target));

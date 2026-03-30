@@ -7,7 +7,7 @@ import LogoutConfirmationModal from './ui/LogoutConfirmationModal';
 
 const ShopOwnerLayout = ({ children }) => {
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [displayName, setDisplayName] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   // normalize mobile once so the effect below can depend on a stable primitive
@@ -74,7 +74,7 @@ const ShopOwnerLayout = ({ children }) => {
   };
 
   const handleConfirmLogout = () => {
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     window.location.href = '/login';
   };
 

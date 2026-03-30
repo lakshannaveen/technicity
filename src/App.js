@@ -36,7 +36,7 @@ import SupplierLayout from './components/SupplierLayout';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
   // Normalize the user's role to prevent unexpected redirects on refresh
   let role = (user.role || user.Role || user.UserRole || '').toString().trim().toLowerCase();
@@ -78,7 +78,7 @@ const SupplierRoute = ({ children }) => (
 
 // Default Route Resolver to prevent logging out users who hit bad paths
 const DefaultRoute = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   let role = (user.role || user.Role || user.UserRole || '').toString().trim().toLowerCase();
   
   if (role === 'a' || role.startsWith('a') || role === 'admin' || role.includes('shop')) {

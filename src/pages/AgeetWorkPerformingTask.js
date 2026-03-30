@@ -391,11 +391,10 @@ import UserService from '../services/UserService';
 import RepairmanService from '../services/RepairmanService';
 
 const AgeetWorkPerformingTask = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [tickets, setTickets] = useState([]);
   const [repairmanId, setRepairmanId] = useState(null);
-
-  const repNameUsed = (localStorage.getItem('rep_name') || user.username || '').trim();
+  const repNameUsed = (sessionStorage.getItem('rep_name') || user.username || '').trim();
 
   const normalizeStatus = (s) => {
     const st = s == null ? '' : String(s).trim().toLowerCase();

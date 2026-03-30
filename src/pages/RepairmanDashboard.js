@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 
 const RepairmanDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [stats, setStats] = useState({
     assignedRepairs: 0,
     completedToday: 0,
@@ -51,7 +51,7 @@ const RepairmanDashboard = () => {
     let mounted = true;
     (async () => {
       try {
-        const rawUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const rawUser = JSON.parse(sessionStorage.getItem('user') || '{}');
         let repairmanId = rawUser?.repairman_id;
 
         if (!repairmanId) {
@@ -136,7 +136,7 @@ const RepairmanDashboard = () => {
     // speeds, which made the counter values flicker on each refresh.
     const resolveRepairmanId = async () => {
       try {
-        const rawUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const rawUser = JSON.parse(sessionStorage.getItem('user') || '{}');
         const mobile = (rawUser.phone || rawUser.mobile || rawUser.MobileNo || rawUser.Mobile || rawUser.mobileNo || '').toString().replace(/\D/g, '');
         if (mobile) {
           const roleRes = await UserService.testGetUserRole(mobile);
@@ -166,7 +166,7 @@ const RepairmanDashboard = () => {
 
     // repairmanId and repName are resolved once and reused in every poll.
     let resolvedRepairmanId = null;
-    let resolvedRepName = localStorage.getItem('rep_name') || user?.username || '';
+    let resolvedRepName = sessionStorage.getItem('rep_name') || user?.username || '';
 
     // const loadData = async (repairmanId, repName) => {
     //   const storedTickets = JSON.parse(localStorage.getItem('repairTickets') || '[]');
@@ -338,7 +338,7 @@ const RepairmanDashboard = () => {
     let mounted = true;
     const fetchName = async () => {
       try {
-        const raw = JSON.parse(localStorage.getItem('user') || '{}');
+        const raw = JSON.parse(sessionStorage.getItem('user') || '{}');
         const mobile = (raw.phone || raw.mobile || raw.MobileNo || raw.Mobile || raw.mobileNo || '').toString().replace(/\D/g, '');
         if (!mobile) {
           setDisplayName(raw.username || raw.name || '');
@@ -352,7 +352,7 @@ const RepairmanDashboard = () => {
         if (name) setDisplayName(String(name));
         else setDisplayName(raw.username || raw.name || '');
       } catch (err) {
-        const raw = JSON.parse(localStorage.getItem('user') || '{}');
+        const raw = JSON.parse(sessionStorage.getItem('user') || '{}');
         setDisplayName(raw.username || raw.name || '');
       }
     };
@@ -429,14 +429,14 @@ const RepairmanDashboard = () => {
 
     // Persist resolved name to localStorage so UI/header and other pages stay in sync
     try {
-      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      const stored = JSON.parse(sessionStorage.getItem('user') || '{}');
       if (repName && stored) {
         stored.UserName = stored.UserName || repName;
         stored.displayName = stored.displayName || repName;
         // also keep username field and a dedicated rep_name key for other pages
         stored.username = stored.username || repName;
-        try { localStorage.setItem('rep_name', repName); } catch (e) { /* ignore */ }
-        localStorage.setItem('user', JSON.stringify(stored));
+        try { sessionStorage.setItem('rep_name', repName); } catch (e) { /* ignore */ }
+        sessionStorage.setItem('user', JSON.stringify(stored));
       }
     } catch (e) {
       // ignore persistence failures

@@ -104,8 +104,8 @@ const OTPVerification = () => {
         localStorage.setItem('users', JSON.stringify(users));
       }
 
-      // mark user as logged in
-      localStorage.setItem('user', JSON.stringify(user));
+      // mark user as logged in (per-tab)
+      sessionStorage.setItem('user', JSON.stringify(user));
       localStorage.removeItem('unverifiedUser');
       localStorage.removeItem('demoOtp');
 
@@ -124,8 +124,8 @@ const OTPVerification = () => {
         if (serverUserName) {
           user.displayName = user.displayName || serverUserName;
           if (!user.username || String(user.username).startsWith('user')) user.username = serverUserName;
-          try { localStorage.setItem('rep_name', serverUserName); } catch (e) { /* ignore */ }
-          localStorage.setItem('user', JSON.stringify(user));
+          try { sessionStorage.setItem('rep_name', serverUserName); } catch (e) { /* ignore */ }
+          sessionStorage.setItem('user', JSON.stringify(user));
         }
 
         const r = (role || user.role || '').toString().trim().toLowerCase();
@@ -141,7 +141,7 @@ const OTPVerification = () => {
 
         // persist canonical role so ProtectedRoute accepts it
         user.role = canonicalRole;
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('user', JSON.stringify(user));
 
         if (canonicalRole === 'shopowner') {
           navigate('/shop-owner/dashboard');

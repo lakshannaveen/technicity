@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const SupplierDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   
   // Sample data for demonstration
   const orders = [
@@ -25,7 +25,7 @@ const SupplierDashboard = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     window.location.href = '/login';
   };
 

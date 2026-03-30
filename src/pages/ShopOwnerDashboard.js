@@ -667,7 +667,7 @@ import CustomerBillService from '../services/CustomerBillService';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const ShopOwnerDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [stats, setStats] = useState({
     totalRepairs: 0,
     waitingRepairs: 0,
@@ -710,7 +710,7 @@ const ShopOwnerDashboard = () => {
     let mounted = true;
     const fetchName = async () => {
       try {
-        const raw = JSON.parse(localStorage.getItem('user') || '{}');
+        const raw = JSON.parse(sessionStorage.getItem('user') || '{}');
         const mobile = (raw.phone || raw.mobile || raw.MobileNo || raw.Mobile || raw.mobileNo || '').toString().replace(/\D/g, '');
         if (!mobile) {
           setDisplayName(raw.username || raw.name || '');
@@ -725,7 +725,7 @@ const ShopOwnerDashboard = () => {
         if (name) setDisplayName(String(name));
         else setDisplayName(raw.username || raw.name || '');
       } catch (err) {
-        const raw = JSON.parse(localStorage.getItem('user') || '{}');
+        const raw = JSON.parse(sessionStorage.getItem('user') || '{}');
         setDisplayName(raw.username || raw.name || '');
       }
     };

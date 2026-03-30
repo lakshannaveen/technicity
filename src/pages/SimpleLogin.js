@@ -24,7 +24,7 @@ const SimpleLogin = () => {
   // Redirect to dashboard if already logged in
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
         let matchRole = (parsed.role || parsed.Role || parsed.UserRole || '').toString().trim().toLowerCase();
@@ -178,8 +178,8 @@ const SimpleLogin = () => {
         localStorage.setItem('users', JSON.stringify(users));
       }
 
-      // mark logged in
-      localStorage.setItem('user', JSON.stringify(user));
+      // mark logged in (per-tab session)
+      sessionStorage.setItem('user', JSON.stringify(user));
       localStorage.removeItem('unverifiedUser');
       localStorage.removeItem('demoOtp');
 
@@ -202,9 +202,9 @@ const SimpleLogin = () => {
           canonicalRole = 'supplier';
         }
 
-        // persist canonical role so ProtectedRoute accepts it
+        // persist canonical role so ProtectedRoute accepts it (per-tab)
         user.role = canonicalRole;
-        localStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('user', JSON.stringify(user));
 
         if (canonicalRole === 'shopowner') {
           navigate('/shop-owner/dashboard');

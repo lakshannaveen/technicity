@@ -31,7 +31,7 @@ const PartsRequest = () => {
   const handleSubmitRequest = (e) => {
     e.preventDefault();
     
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('user') || '{}');
     const selectedSupplier = suppliers.find(s => s.supplier_id === partRequest.supplierId);
     
     const newRequest = {

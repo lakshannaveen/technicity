@@ -413,7 +413,7 @@ import {
 } from "@mui/material";
 
 const AvailableRepairs = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = JSON.parse(sessionStorage.getItem('user') || '{}');
 
   const [availableRepairs, setAvailableRepairs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('All');
