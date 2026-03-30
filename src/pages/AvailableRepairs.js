@@ -845,11 +845,9 @@ const AvailableRepairs = () => {
         </Card>
       </Grid>
 
-      {/* MAIN CARD */}
-      <Card sx={{ p: 4, borderRadius: 4, boxShadow: 3 }}>
-        <Typography variant="h6" fontWeight="bold" mb={3}>
-          Available Repair Tickets
-        </Typography>
+      {/* MAIN CARD (transparent background - no white box) */}
+      <Card sx={{ p: 4, borderRadius: 0, boxShadow: 'none', bgcolor: 'transparent' }}>
+        {/* (Heading removed as requested) */}
 
         {isLoading ? (
           <Box textAlign="center" py={6}>
@@ -871,72 +869,66 @@ const AvailableRepairs = () => {
               <Grid item xs={12} md={6} lg={4} key={ticket.id}>
                 <Card
                   sx={{
-                    p: 3,
-                    borderRadius: 4,
-                    boxShadow: 2,
+                    p: 0,
+                    borderRadius: 3,
+                    boxShadow: 3,
                     height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    transition: '0.3s',
-                    '&:hover': {
-                      transform: 'translateY(-6px)',
-                      boxShadow: 6
-                    }
+                    overflow: 'hidden',
+                    transition: 'transform .18s ease, box-shadow .18s ease',
+                    '&:hover': { transform: 'translateY(-6px)', boxShadow: 8 }
                   }}
                 >
-                  {/* TOP */}
-                  <Box>
-                    <Grid container justifyContent="space-between" alignItems="flex-start">
-                      <Box>
-                        <Typography fontWeight="bold" mb={0.5}>
-                          {ticket.brand}
-                        </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, p: 2, alignItems: 'flex-start' }}>
+                    <Box sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg,#e6f0ff,#d7ecff)'
+                    }}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.72c.12 1.05.37 2.07.73 3.03a2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0 0 0 6 6l1.05-1.05a2 2 0 0 1 2.11-.45c.96.36 1.98.61 3.03.73A2 2 0 0 1 22 16.92z" stroke="#2563eb" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </Box>
 
-                        <Typography fontSize={13} color="text.secondary">
-                          {ticket.customerName}
-                        </Typography>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+                        <Box>
+                          <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{ticket.brand}</Typography>
+                          <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>{ticket.customerName}</Typography>
+                          <Typography sx={{ fontSize: 12, color: 'text.secondary', mt: 0.5 }}>{ticket.customerPhone}</Typography>
+                        </Box>
 
-                        <Typography fontSize={12} color="text.secondary" mb={1}>
-                          {ticket.customerPhone}
-                        </Typography>
+                        <Chip label="Available" size="small" sx={{ bgcolor: '#eef6ff', color: '#2563eb', fontWeight: 600 }} />
                       </Box>
 
-                      <Chip
-                        label="Available"
-                        color="primary"
-                        size="small"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    </Grid>
+                      <Typography sx={{ mt: 1.5, color: 'text.secondary', fontSize: 13, minHeight: 40 }}>{ticket.issue || 'No description'}</Typography>
 
-                    {/* ISSUE */}
-                    <Typography mt={2} fontSize={13} color="text.secondary" lineHeight={1.5}>
-                      {ticket.issue}
-                    </Typography>
+                      <Typography sx={{ mt: 1, fontSize: 12, color: 'text.secondary' }}>Created: {formatDate(ticket.createdAt)}</Typography>
 
-                    {/* DATE */}
-                    <Typography mt={2} fontSize={12} color="text.secondary">
-                      Created: {formatDate(ticket.createdAt)}
-                    </Typography>
+                      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                          onClick={() => claimRepair(ticket.id)}
+                          sx={{
+                            background: 'linear-gradient(90deg,#2b6ef6,#1e90ff)',
+                            color: '#fff',
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            px: 3,
+                            '&:hover': { boxShadow: '0 6px 18px rgba(30,144,255,0.18)' }
+                          }}
+                        >
+                          <svg className="mr-2" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: 8 }}>
+                            <path d="M12 5v14M5 12h14" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Claim Repair
+                        </Button>
+                      </Box>
+                    </Box>
                   </Box>
-
-                  {/* ACTION */}
-                  <Box mt={3} textAlign="right">
-                    <Button
-                      variant="contained"
-                      size="medium"
-                      onClick={() => claimRepair(ticket.id)}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        px: 3
-                      }}
-                    >
-                      Claim Repair
-                    </Button>
-                  </Box>
-
                 </Card>
               </Grid>
             ))}
