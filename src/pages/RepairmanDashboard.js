@@ -730,9 +730,7 @@ const RepairmanDashboard = () => {
                         </div>
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-gray-500">Due: {ticket.estimatedCompletion || 'Not set'}</span>
-                          <Link to="/repairman/performing-task" className="text-blue-600 hover:text-blue-700 font-medium">
-                            Update →
-                          </Link>
+                          {/* 'Update' link removed on dashboard cards */}
                         </div>
                       </div>
                     ))}
