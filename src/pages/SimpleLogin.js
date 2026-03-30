@@ -18,6 +18,8 @@ const SimpleLogin = () => {
   const [canResend, setCanResend] = useState(false);
   const [resendCount, setResendCount] = useState(0); // increments on each resend to restart timer
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -82,14 +84,19 @@ const SimpleLogin = () => {
     }
 
     // Call backend to send OTP
-    const result = await dispatch(sendOtp(cleaned));
-    if (result && result.success) {
-      // Show OTP UI and start timer
-      setShowOtp(true);
-      setTimeLeft(120);
-      setCanResend(false);
-    } else {
-      setPhoneError(result.error || 'Failed to send OTP');
+    setIsSendingOtp(true);
+    try {
+      const result = await dispatch(sendOtp(cleaned));
+      if (result && result.success) {
+        // Show OTP UI and start timer
+        setShowOtp(true);
+        setTimeLeft(120);
+        setCanResend(false);
+      } else {
+        setPhoneError(result.error || 'Failed to send OTP');
+      }
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
@@ -236,16 +243,20 @@ const SimpleLogin = () => {
       setPhoneError('No phone to resend to');
       return;
     }
-
-    const result = await dispatch(resendOtp(phoneForResend));
-    if (result.success) {
-      setOtp(['', '', '', '', '', '']);
-      setPhoneError('');
-      // Incrementing resendCount causes the timer useEffect to re-run,
-      // which resets timeLeft to 120 and starts a fresh countdown.
-      setResendCount(c => c + 1);
-    } else {
-      setPhoneError(result.error || 'Failed to resend OTP');
+    setIsResendingOtp(true);
+    try {
+      const result = await dispatch(resendOtp(phoneForResend));
+      if (result.success) {
+        setOtp(['', '', '', '', '', '']);
+        setPhoneError('');
+        // Incrementing resendCount causes the timer useEffect to re-run,
+        // which resets timeLeft to 120 and starts a fresh countdown.
+        setResendCount(c => c + 1);
+      } else {
+        setPhoneError(result.error || 'Failed to resend OTP');
+      }
+    } finally {
+      setIsResendingOtp(false);
     }
   };
 
@@ -322,7 +333,23 @@ const SimpleLogin = () => {
                 {phoneError && <p className="text-sm text-red-300">{phoneError}</p>}
 
                 <div className="flex gap-3">
-                  <button onClick={sendOtpToPhone} className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-semibold shadow hover:scale-[1.02] transition">Send OTP</button>
+                  <button
+                    onClick={sendOtpToPhone}
+                    disabled={isSendingOtp}
+                    className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-semibold shadow hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSendingOtp ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      'Send OTP'
+                    )}
+                  </button>
                 </div>
               </>
             ) : (
@@ -346,7 +373,23 @@ const SimpleLogin = () => {
 
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-white/80">Time remaining: <span className="font-mono">{formatTime(timeLeft)}</span></p>
-                  <button onClick={resendOtpInline} disabled={!canResend} className="text-sm text-white/80 disabled:opacity-40 hover:text-white transition-colors">Resend</button>
+                  <button
+                    onClick={resendOtpInline}
+                    disabled={!canResend || isResendingOtp}
+                    className="text-sm text-white/80 disabled:opacity-40 hover:text-white transition-colors disabled:cursor-not-allowed"
+                  >
+                    {isResendingOtp ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        Resending...
+                      </>
+                    ) : (
+                      'Resend'
+                    )}
+                  </button>
                 </div>
 
                 {phoneError && <p className="text-sm text-red-300">{phoneError}</p>}

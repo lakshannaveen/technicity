@@ -8,6 +8,7 @@ const OTPVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [canResend, setCanResend] = useState(false);
   const navigate = useNavigate();
@@ -54,17 +55,20 @@ const OTPVerification = () => {
 
   const handleResendOTP = async () => {
     const unverifiedUser = JSON.parse(localStorage.getItem('unverifiedUser') || '{}');
-
-    const result = await dispatch(resendOtp(unverifiedUser.phone));
-
-    if (result.success) {
-      setTimeLeft(600);
-      setCanResend(false);
-      setOtp(['', '', '', '', '', '']);
-      setError('');
-      document.getElementById('otp-0').focus();
-    } else {
-      setError(result.error);
+    setIsResending(true);
+    try {
+      const result = await dispatch(resendOtp(unverifiedUser.phone));
+      if (result.success) {
+        setTimeLeft(600);
+        setCanResend(false);
+        setOtp(['', '', '', '', '', '']);
+        setError('');
+        const el = document.getElementById('otp-0'); if (el) el.focus();
+      } else {
+        setError(result.error);
+      }
+    } finally {
+      setIsResending(false);
     }
   };
 
