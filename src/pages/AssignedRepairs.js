@@ -14,6 +14,7 @@ const AssignedRepairs = () => {
   const [startNote, setStartNote] = useState('');
   const [repairmanId, setRepairmanId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const initialLoadRef = useRef(true);
   // full diagnosing list from server (or localStorage) — prefer showing these when available
 
   const [diagnosingList, setDiagnosingList] = useState([]);
@@ -32,6 +33,7 @@ const AssignedRepairs = () => {
   const normalizeStatus = (s) => {
     const st = (s == null) ? '' : String(s).trim();
     const low = st.toLowerCase();
+    if (low === 'd' || low.startsWith('diag')) return 'Diagnosing';
     if (low === 'w') return 'Waiting for Parts';
     if (low === 'i') return 'In Progress';
     if (low === 'c') return 'Completed';
@@ -68,7 +70,7 @@ const AssignedRepairs = () => {
     let mounted = true;
 
     const loadAssignedRepairs = async () => {
-      setIsLoading(true);
+      if (initialLoadRef.current) setIsLoading(true);
       try {
         // Resolve repairman_id (prefer authoritative TestGetUserRole)
         const rawUser = user || {};
@@ -258,15 +260,41 @@ const AssignedRepairs = () => {
           setMyRepairs([]);
         }
       } finally {
-        if (mounted) setIsLoading(false);
+        if (mounted) {
+          if (initialLoadRef.current) {
+            setIsLoading(false);
+            initialLoadRef.current = false;
+          }
+          // do not toggle isLoading on subsequent background polls to avoid flashing the spinner
+        }
       }
 
     };
 
     loadAssignedRepairs();
-    const interval = setInterval(loadAssignedRepairs, 5000);
-    return () => { mounted = false; clearInterval(interval); };
-  }, [user.username]);
+    // Only poll when no modals are open and the tab is visible
+    let interval = null;
+    const startIfAllowed = () => {
+      if (!showStartModal && !showPartsModal && document.visibilityState === 'visible') {
+        loadAssignedRepairs();
+        interval = setInterval(loadAssignedRepairs, 5000);
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        // refresh once when user returns
+        loadAssignedRepairs();
+        if (!interval && !showStartModal && !showPartsModal) interval = setInterval(loadAssignedRepairs, 5000);
+      } else {
+        if (interval) { clearInterval(interval); interval = null; }
+      }
+    };
+
+    startIfAllowed();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { mounted = false; if (interval) clearInterval(interval); document.removeEventListener('visibilitychange', onVisibility); };
+  }, [user.username, showStartModal, showPartsModal]);
 
   // Filter-by-status removed: we display server results only
 
@@ -841,9 +869,10 @@ const AssignedRepairs = () => {
                         {/* Plain status badge (dropdown removed) */}
                         {(() => {
                           const statusVal = (ticket.raw && (ticket.raw.status || ticket.raw.Status)) || ticket.status || 'Diagnosing';
+                          const displayStatus = normalizeStatus(statusVal);
                           return (
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(statusVal)}`}>
-                              {statusVal}
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(displayStatus)}`}>
+                              {displayStatus}
                             </span>
                           );
                         })()}

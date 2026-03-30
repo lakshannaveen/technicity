@@ -423,6 +423,7 @@ const AvailableRepairs = () => {
   const normalizeStatus = (s) => {
     const st = (s == null) ? '' : String(s).trim();
     const low = st.toLowerCase();
+    if (low === 'd' || low.startsWith('diag')) return 'Diagnosing';
     if (low === 'w') return 'Waiting for Parts';
     if (low === 'i') return 'In Progress';
     if (low === 'c') return 'Completed';
@@ -481,8 +482,29 @@ const AvailableRepairs = () => {
     };
 
     loadAvailableRepairs();
-    const interval = setInterval(loadAvailableRepairs, 50000);
-    return () => clearInterval(interval);
+    // Poll only when the page is visible to avoid unexpected background reloads
+    let interval = null;
+    const maybeStart = () => {
+      if (document.visibilityState === 'visible') {
+        // run an immediate refresh then start interval
+        loadAvailableRepairs();
+        interval = setInterval(loadAvailableRepairs, 30000);
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        // refresh once when user returns to the tab
+        loadAvailableRepairs();
+        if (!interval) interval = setInterval(loadAvailableRepairs, 30000);
+      } else {
+        if (interval) { clearInterval(interval); interval = null; }
+      }
+    };
+
+    maybeStart();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { if (interval) clearInterval(interval); document.removeEventListener('visibilitychange', onVisibility); };
   }, []);
 
   const formatDate = (d) => {
