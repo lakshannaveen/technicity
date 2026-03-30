@@ -955,9 +955,14 @@ const ShopOwnerBills = () => {
                               <button
                                 onClick={() => printBill(bill)}
                                 title="Print Bill"
-                                className="text-blue-600 hover:text-blue-900 text-sm"
+                                aria-label={`Print bill ${bill.id || bill.ticketId || ''}`}
+                                className="text-blue-600 hover:text-blue-900 p-1 rounded"
                               >
-                                Print
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9V2h12v7" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 22h6v-6H9v6z" />
+                                </svg>
                               </button>
                             </div>
                           </td>
