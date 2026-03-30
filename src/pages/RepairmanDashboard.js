@@ -768,8 +768,7 @@ const RepairmanDashboard = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center space-x-3">
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Available</span>
+                          <div className="flex items-center">
                             <button onClick={() => claimRepair(ticket.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                               Claim Repair
                             </button>
@@ -818,9 +817,7 @@ const RepairmanDashboard = () => {
                             </div>
                           </div>
 
-                          <div>
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{ticket.status || 'Diagnosing'}</span>
-                          </div>
+                          <div />
                         </div>
                         <p className="text-sm text-gray-500">{ticket.issue}</p>
                       </div>
