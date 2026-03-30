@@ -389,11 +389,13 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import UserService from '../services/UserService';
 import RepairmanService from '../services/RepairmanService';
+import { CircularProgress } from '@mui/material';
 
 const AgeetWorkPerformingTask = () => {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   const [tickets, setTickets] = useState([]);
   const [repairmanId, setRepairmanId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const repNameUsed = (sessionStorage.getItem('rep_name') || user.username || '').trim();
 
   const normalizeStatus = (s) => {
@@ -491,33 +493,38 @@ const AgeetWorkPerformingTask = () => {
     };
 
     const fetchTickets = async () => {
-      const repId = await resolveRepairmanId();
-      if (!mounted) return;
-
-      setRepairmanId(repId);
-
+      setIsLoading(true);
       try {
-        const res = await api.get(`/RepairTicket/GetInProgressRepairTickets${repId ? '?repairman_id=' + repId : ''}`);
-        let list = [];
-        if (res?.data?.ResultSet) list = res.data.ResultSet;
-        else if (res?.data?.Result) {
-          try { list = JSON.parse(res.data.Result); } catch { list = res.data.Result; }
-        } else if (Array.isArray(res?.data)) list = res.data;
+        const repId = await resolveRepairmanId();
+        if (!mounted) return;
 
-        if (mounted) {
-          const normalized = list.map(normalize);
-          const inProgress = normalized.filter(t => t.status === 'In Progress' && (repId ? String(t.repairmanId) === String(repId) : true));
-          setTickets(inProgress);
-        }
-      } catch (e) {
-        console.warn('Failed to fetch tickets', e);
-        // fallback localStorage
+        setRepairmanId(repId);
+
         try {
-          const stored = JSON.parse(localStorage.getItem('diagnosingTickets') || localStorage.getItem('repairTickets') || '[]');
-          const normalized = stored.map(normalize);
-          const inProgressStored = normalized.filter(t => t.status === 'In Progress' && (repId ? String(t.repairmanId) === String(repId) : true));
-          if (mounted) setTickets(inProgressStored);
-        } catch { }
+          const res = await api.get(`/RepairTicket/GetInProgressRepairTickets${repId ? '?repairman_id=' + repId : ''}`);
+          let list = [];
+          if (res?.data?.ResultSet) list = res.data.ResultSet;
+          else if (res?.data?.Result) {
+            try { list = JSON.parse(res.data.Result); } catch { list = res.data.Result; }
+          } else if (Array.isArray(res?.data)) list = res.data;
+
+          if (mounted) {
+            const normalized = list.map(normalize);
+            const inProgress = normalized.filter(t => t.status === 'In Progress' && (repId ? String(t.repairmanId) === String(repId) : true));
+            setTickets(inProgress);
+          }
+        } catch (e) {
+          console.warn('Failed to fetch tickets', e);
+          // fallback localStorage
+          try {
+            const stored = JSON.parse(localStorage.getItem('diagnosingTickets') || localStorage.getItem('repairTickets') || '[]');
+            const normalized = stored.map(normalize);
+            const inProgressStored = normalized.filter(t => t.status === 'In Progress' && (repId ? String(t.repairmanId) === String(repId) : true));
+            if (mounted) setTickets(inProgressStored);
+          } catch { }
+        }
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     };
 
@@ -595,43 +602,49 @@ const AgeetWorkPerformingTask = () => {
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">My Performing task</h2>
       <div className="bg-white shadow rounded p-4">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tickets.length === 0 ? (
+        {isLoading ? (
+          <div className="py-12 text-center">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">No performing tasks</td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
-              ) : tickets.map(t => (
-                <tr key={t.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{t.raw?.ticket_id || t.raw?.TicketID || t.id || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{t.raw?.brand || t.raw?.device || t.raw?.brand_name || t.brand || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{t.raw?.issue_description || t.raw?.issue || t.raw?.problem || t.issue || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      t.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                      t.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>{t.status}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {t.status !== 'In Progress' && <button onClick={() => updateStatus(t, 'In Progress')} className="text-blue-600 hover:text-blue-900">Mark In Complete</button>}
-                    {t.status !== 'Completed' && <button onClick={() => updateStatus(t, 'Completed')} className="text-green-600 hover:text-green-900">Mark Completed</button>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {tickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-500">No performing tasks</td>
+                  </tr>
+                ) : tickets.map(t => (
+                  <tr key={t.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{t.raw?.ticket_id || t.raw?.TicketID || t.id || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{t.raw?.brand || t.raw?.device || t.raw?.brand_name || t.brand || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{t.raw?.issue_description || t.raw?.issue || t.raw?.problem || t.issue || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        t.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                        t.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>{t.status}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      {t.status !== 'In Progress' && <button onClick={() => updateStatus(t, 'In Progress')} className="text-blue-600 hover:text-blue-900">Mark In Complete</button>}
+                      {t.status !== 'Completed' && <button onClick={() => updateStatus(t, 'Completed')} className="text-green-600 hover:text-green-900">Mark Completed</button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

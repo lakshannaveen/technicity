@@ -11,6 +11,7 @@ import {
   Button,
   Chip
 } from "@mui/material";
+import { CircularProgress } from '@mui/material';
 
 const RepairmanDashboard = () => {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -22,6 +23,7 @@ const RepairmanDashboard = () => {
   const [availableRepairs, setAvailableRepairs] = useState([]);
   const [myRepairs, setMyRepairs] = useState([]);
   const [displayName, setDisplayName] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadMyRepairs = async (repairmanIdentifier) => {
     try {
@@ -253,7 +255,8 @@ const RepairmanDashboard = () => {
 
 
     const loadData = async (repairmanId, repName) => {
-  try {
+      setIsLoading(true);
+      try {
     // 🔥 1. FETCH ALL TICKETS FROM API (NO localStorage)
     const res = await api.get('/RepairTicket/GetAllRepairTicket');
 
@@ -313,6 +316,8 @@ const RepairmanDashboard = () => {
 
   } catch (err) {
     console.error('LoadData API error:', err);
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -647,90 +652,96 @@ const RepairmanDashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Available Repairs */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">Available Repairs</h2>
-                <Link to="/repairman/available-repairs" className="text-white hover:text-blue-100 text-sm font-medium transition-colors">
-                  View All →
-                </Link>
+        {isLoading ? (
+          <div className="py-12 flex items-center justify-center">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Available Repairs */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold text-white">Available Repairs</h2>
+                  <Link to="/repairman/available-repairs" className="text-white hover:text-blue-100 text-sm font-medium transition-colors">
+                    View All →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {availableRepairs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📋</div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">No Available Repairs</h3>
+                    <p className="text-gray-600">All repairs are currently assigned.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {availableRepairs.map(ticket => (
+                      <div key={ticket.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
+                            <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                          </div>
+                          <button onClick={() => claimRepair(ticket.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                            Claim Repair
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-500 line-clamp-2">{ticket.issue}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="p-6">
-              {availableRepairs.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📋</div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">No Available Repairs</h3>
-                  <p className="text-gray-600">All repairs are currently assigned.</p>
+            {/* My Repairs */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold text-white">My Repairs</h2>
+                  <Link to="/repairman/assigned-repairs" className="text-white hover:text-green-100 text-sm font-medium transition-colors">
+                    View All →
+                  </Link>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {availableRepairs.map(ticket => (
-                    <div key={ticket.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
-                          <p className="text-sm text-gray-600">{ticket.customerName}</p>
-                        </div>
-                        <button onClick={() => claimRepair(ticket.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                          Claim Repair
-                        </button>
-                      </div>
-                      <p className="text-sm text-gray-500 line-clamp-2">{ticket.issue}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* My Repairs */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-            <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-white">My Repairs</h2>
-                <Link to="/repairman/assigned-repairs" className="text-white hover:text-green-100 text-sm font-medium transition-colors">
-                  View All →
-                </Link>
+              <div className="p-6">
+                {myRepairs.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🔧</div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">No Assigned Repairs</h3>
+                    <p className="text-gray-600">Claim repairs from available repairs list.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myRepairs.map(ticket => (
+                      <div key={ticket.id} className={`bg-gray-50 rounded-lg p-4 border-l-4 ${getStatusColor(ticket.status).split(' ')[2]}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
+                            <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                          </div>
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(ticket.status)}`}>
+                            {ticket.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-gray-500">Due: {ticket.estimatedCompletion || 'Not set'}</span>
+                          <Link to="/repairman/performing-task" className="text-blue-600 hover:text-blue-700 font-medium">
+                            Update →
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-
-            <div className="p-6">
-              {myRepairs.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🔧</div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">No Assigned Repairs</h3>
-                  <p className="text-gray-600">Claim repairs from available repairs list.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {myRepairs.map(ticket => (
-                    <div key={ticket.id} className={`bg-gray-50 rounded-lg p-4 border-l-4 ${getStatusColor(ticket.status).split(' ')[2]}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
-                          <p className="text-sm text-gray-600">{ticket.customerName}</p>
-                        </div>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(ticket.status)}`}>
-                          {ticket.status}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-500">Due: {ticket.estimatedCompletion || 'Not set'}</span>
-                        <Link to="/repairman/performing-task" className="text-blue-600 hover:text-blue-700 font-medium">
-                          Update →
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

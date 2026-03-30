@@ -409,7 +409,8 @@ import {
   Card,
   Typography,
   Button,
-  Chip
+  Chip,
+  CircularProgress
 } from "@mui/material";
 
 const AvailableRepairs = () => {
@@ -417,6 +418,7 @@ const AvailableRepairs = () => {
 
   const [availableRepairs, setAvailableRepairs] = useState([]);
   const [filterStatus, setFilterStatus] = useState('All');
+  const [isLoading, setIsLoading] = useState(true);
 
   const normalizeStatus = (s) => {
     const st = (s == null) ? '' : String(s).trim();
@@ -436,6 +438,7 @@ const AvailableRepairs = () => {
   useEffect(() => {
     const loadAvailableRepairs = async () => {
       try {
+        setIsLoading(true);
         const res = await api.get('/RepairTicket/GetAllRepairTicket');
 
         let list = [];
@@ -472,6 +475,8 @@ const AvailableRepairs = () => {
       } catch (err) {
         console.error('Failed to fetch available repairs:', err);
         setAvailableRepairs([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -621,7 +626,11 @@ const AvailableRepairs = () => {
           Available Repair Tickets
         </Typography>
 
-        {filteredRepairs.length === 0 ? (
+        {isLoading ? (
+          <Box textAlign="center" py={6}>
+            <CircularProgress />
+          </Box>
+        ) : filteredRepairs.length === 0 ? (
           <Box textAlign="center" py={8}>
             <Typography fontSize={60} mb={2}>📋</Typography>
             <Typography fontWeight="bold" mb={1}>

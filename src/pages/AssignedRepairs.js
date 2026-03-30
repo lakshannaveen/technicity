@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import UserService from '../services/UserService';
 import RepairmanService from '../services/RepairmanService';
+import { CircularProgress } from '@mui/material';
 
 const AssignedRepairs = () => {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
@@ -12,6 +13,7 @@ const AssignedRepairs = () => {
   const [startTicket, setStartTicket] = useState(null);
   const [startNote, setStartNote] = useState('');
   const [repairmanId, setRepairmanId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   // full diagnosing list from server (or localStorage) — prefer showing these when available
 
   const [diagnosingList, setDiagnosingList] = useState([]);
@@ -66,6 +68,7 @@ const AssignedRepairs = () => {
     let mounted = true;
 
     const loadAssignedRepairs = async () => {
+      setIsLoading(true);
       try {
         // Resolve repairman_id (prefer authoritative TestGetUserRole)
         const rawUser = user || {};
@@ -254,6 +257,8 @@ const AssignedRepairs = () => {
           setDiagnosingList([]);
           setMyRepairs([]);
         }
+      } finally {
+        if (mounted) setIsLoading(false);
       }
 
     };
@@ -798,7 +803,11 @@ const AssignedRepairs = () => {
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Performing task</h2>
 
-          {displayRepairs.length === 0 ? (
+          {isLoading ? (
+            <div className="py-8 text-center">
+              <CircularProgress />
+            </div>
+          ) : displayRepairs.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-5xl mb-4">🔧</div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">No Assigned Repairs</h3>
