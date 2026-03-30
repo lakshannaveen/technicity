@@ -365,6 +365,30 @@ const RepairmanDashboard = () => {
     const waitingForParts = myRepairsAll.filter(t => t.status === 'Waiting for Parts').length;
     setStats({ assignedRepairs: myRepairsAll.length, completedToday, waitingForParts });
 
+    // Populate Available Repairs card using normalized tickets persisted by AvailableRepairs page
+    try {
+      const storedTickets = JSON.parse(localStorage.getItem('repairTickets') || '[]');
+      const isAssignedLocal = (t) => {
+        const rid = t.repairman_id ?? t.RepairmanID ?? t.RepairmanId ?? null;
+        if (rid !== undefined && rid !== null) {
+          const rs = String(rid).trim().toLowerCase();
+          if (rs !== '' && rs !== '0' && rs !== 'null') return true;
+        }
+        const a = String(t.assignedTo || t.assigned || t.repName || t.rep_name || '').trim().toLowerCase();
+        if (a !== '' && a !== '0' && a !== 'null') return true;
+        return false;
+      };
+
+      const availableFromStorage = (storedTickets || []).map(item => ({
+        ...item,
+        status: normalizeStatus(item.status || item.Status)
+      })).filter(t => !isAssignedLocal(t) && String(t.status || '').toLowerCase() === 'available');
+
+      setAvailableRepairs(availableFromStorage.slice(0, 3));
+    } catch (e) {
+      // ignore; leave availableRepairs as-is
+    }
+
   } catch (err) {
     console.error('LoadData API error:', err);
   } finally {

@@ -454,21 +454,37 @@ const AvailableRepairs = () => {
           }
         }
 
-        // ✅ NORMALIZE (WITH repairman_id)
+        // ✅ NORMALIZE (WITH repairman_id + assignedTo)
         const normalized = (list || []).map(item => ({
-          id: item.ticket_id,
-          brand: item.brand,
-          issue: item.issue_description,
-          customerName: item.customer_name,
-          customerPhone: item.phone_no,
-          status: normalizeStatus(item.status),
-          repairman_id: item.repairman_id, // ✅ IMPORTANT
-          createdAt: item.created_date
+          id: item.ticket_id || item.TicketID || item.id || Date.now(),
+          brand: item.brand || item.device || item.device_brand || '',
+          issue: item.issue_description || item.issue || '',
+          customerName: item.customer_name || item.customer || '',
+          customerPhone: item.phone_no || item.customerPhone || item.customer_phone || '',
+          status: normalizeStatus(item.status || item.Status),
+          repairman_id: item.repairman_id ?? item.RepairmanID ?? item.RepairmanId ?? null,
+          assignedTo: item.assignedTo || item.assigned || item.rep_name || item.repairman || '',
+          createdAt: item.created_date || item.createdAt || item.created_at || item.date || ''
         }));
 
-        // ✅ FILTER ONLY UNASSIGNED
+        // persist normalized tickets for other pages that read localStorage
+        try { localStorage.setItem('repairTickets', JSON.stringify(normalized)); } catch (e) { /* ignore */ }
+
+        // Helper: treat '0', 0, 'null', empty as unassigned
+        const isAssigned = (t) => {
+          const rid = t.repairman_id;
+          if (rid !== undefined && rid !== null) {
+            const rs = String(rid).trim().toLowerCase();
+            if (rs !== '' && rs !== '0' && rs !== 'null') return true;
+          }
+          const a = String(t.assignedTo || '').trim().toLowerCase();
+          if (a !== '' && a !== '0' && a !== 'null') return true;
+          return false;
+        };
+
+        // ✅ FILTER ONLY UNASSIGNED: require no repairman and no assigned name, and status available
         const availableRepairsData = normalized.filter(
-          t => !t.repairman_id
+          t => !isAssigned(t) && String(t.status || '').toLowerCase() === 'available'
         );
 
         setAvailableRepairs(availableRepairsData);
