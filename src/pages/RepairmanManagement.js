@@ -398,7 +398,7 @@ const RepairmanManagement = () => {
                         <div className="flex space-x-3">
                           <button
                             onClick={() => toggleStatus(repairman.id, repairman.status)}
-                            className={`p-1 rounded-md ${repairman.status === 'Active' ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
+                            className={`p-1 rounded-md ${repairman.status === 'Active' ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
                             title={repairman.status === 'Active' ? 'Deactivate' : 'Activate'}
                           >
                             {/* Improved edit icon: pencil inside a circle (outline) */}
