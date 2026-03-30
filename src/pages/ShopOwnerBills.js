@@ -804,6 +804,7 @@ const ShopOwnerBills = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Completed Date</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Repair Details</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
@@ -820,11 +821,27 @@ const ShopOwnerBills = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{repair.customerPhone || (repair.raw && (repair.raw.phone_no || repair.raw.phone || repair.raw.customer_phone || repair.raw.mobile || repair.raw.msisdn || ''))}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(repair.completedAt || (repair.raw && (repair.raw.completed_date || repair.raw.completedAt || repair.raw.completedOn || repair.raw.completed_on)))}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button
+                          onClick={() => openRepairDetails(repair)}
+                          aria-label={`View repair details ${repair.id}`}
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded-md"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-3">
-                          <button onClick={() => openRepairDetails(repair)} className="text-sm text-blue-600 hover:underline">Repair Details</button>
-                          <button onClick={() => openBillForm(repair)} className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md transition duration-200">Create Bill</button>
-                        </div>
+                        <button
+                          onClick={() => openBillForm(repair)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md transition duration-200"
+                          aria-label={`Create bill for ${repair.id}`}
+                        >
+                          Create Bill
+                        </button>
                       </td>
                     </tr>
                   ))}
