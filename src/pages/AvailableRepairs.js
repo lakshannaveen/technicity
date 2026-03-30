@@ -670,7 +670,7 @@ const AvailableRepairs = () => {
         const availableRepairsData = normalized.filter(t => !t.repairman_id || (t.status || '').toLowerCase() === 'available');
         setAvailableRepairs(availableRepairsData);
 
-        alert('Repair claimed; repairman and status updated. Tickets refreshed from server.');
+        alert('Ticket updated successfully.');
         return;
       }
 
