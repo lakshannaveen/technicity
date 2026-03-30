@@ -6,26 +6,33 @@ const Sidebar = ({ title = 'TekniCity', navigation = [] }) => {
 
   return (
     <div className="hidden md:flex md:w-64 md:flex-col">
-      <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white border-r">
-        <div className="flex items-center flex-shrink-0 px-4">
-          <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+      <div className="flex flex-col flex-grow pt-6 overflow-y-auto bg-white/90 backdrop-blur border-r border-slate-200">
+        <div className="flex items-center flex-shrink-0 px-5">
+          <h1 className="text-lg font-semibold text-slate-900 tracking-tight">{title}</h1>
         </div>
-        <div className="mt-5 flex-grow flex flex-col">
-          <nav className="flex-1 px-2 pb-4 space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ${{
-                  true: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }[true]} ${location.pathname === item.href ? 'bg-blue-50 text-blue-700' : ''}`}
-              >
-                <span className="mr-3 text-lg" aria-hidden>
-                  {item.icon}
-                </span>
-                <span className="truncate">{item.name}</span>
-              </Link>
-            ))}
+        <div className="mt-6 flex-grow flex flex-col">
+          <nav className="flex-1 px-3 pb-6 space-y-1">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 border ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-700 border-blue-100 shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border-transparent'
+                  }`}
+                >
+                  {Icon ? (
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'}`} aria-hidden />
+                  ) : null}
+                  <span className="truncate">{item.name}</span>
+                </Link>
+              );
+            })}
           </nav>
         </div>
       </div>

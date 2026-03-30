@@ -13,18 +13,7 @@
 	max-width: 100% !important;
 }
 
-/* Provide sensible padding inside the dashboard area so content doesn't touch the sidebar */
-.dashboard-main > * {
-	padding-left: 1rem; /* 16px */
-	padding-right: 1rem;
-}
-
-/* Ensure dashboard content uses full width on small screens and remove unexpected card rounding */
+/* Ensure dashboard content uses full width on small screens */
 .dashboard-main {
 	width: 100%;
-}
-.dashboard-main .rounded,
-.dashboard-main .rounded-xl,
-.dashboard-main .rounded-lg {
-	border-radius: 0 !important;
 }

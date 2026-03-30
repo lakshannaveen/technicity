@@ -1,6 +1,16 @@
 // ShopOwnerLayout.js
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import {
+  FiBarChart2,
+  FiBox,
+  FiFileText,
+  FiGrid,
+  FiPhone,
+  FiSettings,
+  FiTool,
+  FiUsers,
+} from 'react-icons/fi';
 import UserService from '../services/UserService';
 import Topbar from './ui/Topbar';
 import LogoutConfirmationModal from './ui/LogoutConfirmationModal';
@@ -51,14 +61,14 @@ const ShopOwnerLayout = ({ children }) => {
   const siteTitle = getSiteTitle();
 
   const navigation = [
-    { name: 'Dashboard', href: '/shop-owner/dashboard', icon: '📊' },
-    { name: 'Repair Tickets', href: '/shop-owner/tickets', icon: '🔧' },
-    { name: 'Technicians', href: '/shop-owner/repairmen', icon: '👨‍🔧' },
-    { name: 'Customer Bills', href: '/shop-owner/bills', icon: '🧾' },
-    { name: 'Parts History', href: '/shop-owner/parts-history', icon: '📈' },
-    { name: 'Phone Returns', href: '/shop-owner/phone-returns', icon: '📞' },
-    { name: 'Inventory', href: '/shop-owner/inventory', icon: '📦' },
-    { name: 'Settings', href: '/shop-owner/settings', icon: '⚙️' },
+    { name: 'Dashboard', href: '/shop-owner/dashboard', icon: FiGrid },
+    { name: 'Repair Tickets', href: '/shop-owner/tickets', icon: FiTool },
+    { name: 'Technicians', href: '/shop-owner/repairmen', icon: FiUsers },
+    { name: 'Customer Bills', href: '/shop-owner/bills', icon: FiFileText },
+    { name: 'Parts History', href: '/shop-owner/parts-history', icon: FiBarChart2 },
+    { name: 'Phone Returns', href: '/shop-owner/phone-returns', icon: FiPhone },
+    { name: 'Inventory', href: '/shop-owner/inventory', icon: FiBox },
+    { name: 'Settings', href: '/shop-owner/settings', icon: FiSettings },
   ];
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -85,43 +95,51 @@ const ShopOwnerLayout = ({ children }) => {
   // Admin creation moved to Settings page
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-100">
       {/* Sidebar */}
       <div className="hidden md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white border-r">
-          <div className="flex items-center flex-shrink-0 px-4">
-            <h1 className="text-xl font-bold text-gray-800">{siteTitle}</h1>
+        <div className="flex flex-col flex-grow pt-6 overflow-y-auto bg-white/90 backdrop-blur border-r border-slate-200">
+          <div className="flex items-center flex-shrink-0 px-5">
+            <div className="h-9 w-9 rounded-xl bg-blue-600/10 text-blue-700 flex items-center justify-center mr-3">
+              <FiTool className="h-4 w-4" aria-hidden />
+            </div>
+            <h1 className="text-lg font-semibold text-slate-900 tracking-tight">{siteTitle}</h1>
           </div>
-          <div className="mt-5 flex-grow flex flex-col">
-            <nav className="flex-1 px-2 pb-4 space-y-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                    location.pathname === item.href
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="mr-3 text-lg">{item.icon}</span>
-                  {item.name}
-                </Link>
-              ))}
+          <div className="mt-6 flex-grow flex flex-col">
+            <nav className="flex-1 px-3 pb-6 space-y-1">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 border ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-700 border-blue-100 shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border-transparent'
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'}`} aria-hidden />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+          <div className="flex-shrink-0 flex border-t border-slate-200 p-4">
             <div className="w-full flex justify-center">
               <div className="flex flex-col items-center space-y-2">
                 <div className="text-center">
-                  <p className="text-sm font-medium text-gray-700">{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
-                  <p className="text-xs font-medium text-gray-500">Shop Owner</p>
+                  <p className="text-sm font-medium text-slate-800">{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
+                  <p className="text-xs font-medium text-slate-500">Shop Owner</p>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={handleLogoutClick}
-                    className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                    className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition"
                     title="Logout (destructive)"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -148,42 +166,52 @@ const ShopOwnerLayout = ({ children }) => {
           <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setMobileOpen(false)} />
           <div className="fixed top-0 left-0 bottom-0 z-50 flex">
             <div className="w-64 sm:w-72 bg-white shadow-xl pb-4 flex flex-col overflow-y-auto h-full">
-              <div className="px-4 pt-5 pb-2 flex items-center justify-between">
-                <h1 className="text-lg font-bold text-gray-800">{siteTitle}</h1>
-                <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-600 hover:bg-gray-100 rounded">
+              <div className="px-4 pt-5 pb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-blue-600/10 text-blue-700 flex items-center justify-center">
+                    <FiTool className="h-4 w-4" aria-hidden />
+                  </div>
+                  <h1 className="text-base font-semibold text-slate-900">{siteTitle}</h1>
+                </div>
+                <button onClick={() => setMobileOpen(false)} className="p-2 text-slate-600 hover:bg-slate-100 rounded">
                   <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <nav className="px-2 pb-4 space-y-1">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      location.pathname === item.href
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <span className="mr-3 text-lg">{item.icon}</span>
-                    {item.name}
-                  </Link>
-                ))}
+              <nav className="px-3 pb-4 space-y-1">
+                {navigation.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 border ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-700 border-blue-100 shadow-sm'
+                          : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border-transparent'
+                      }`}
+                    >
+                      <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'}`} aria-hidden />
+                      <span className="truncate">{item.name}</span>
+                    </Link>
+                  );
+                })}
               </nav>
 
-              <div className="mt-auto border-t border-gray-200 p-4">
+              <div className="mt-auto border-t border-slate-200 p-4">
                 <div className="w-full flex items-center">
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium text-gray-700">{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
-                    <p className="text-xs text-gray-500">Shop Owner</p>
+                    <p className="text-sm font-medium text-slate-800">{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
+                    <p className="text-xs text-slate-500">Shop Owner</p>
                   </div>
                   <div className="ml-auto">
                     <button
                       onClick={handleLogoutClick}
-                      className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                      className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition"
                       title="Logout (destructive)"
                     >
                       Logout
@@ -199,7 +227,7 @@ const ShopOwnerLayout = ({ children }) => {
       {/* Main content */}
       <div className="flex flex-col flex-1 w-full overflow-hidden">
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
-            <div className="dashboard-main h-full">
+            <div className="dashboard-main h-full px-4 md:px-6 py-4 md:py-6">
             {children}
           </div>
         </main>
