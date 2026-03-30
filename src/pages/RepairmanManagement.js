@@ -401,9 +401,11 @@ const RepairmanManagement = () => {
                             className={`p-1 rounded-md ${repairman.status === 'Active' ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
                             title={repairman.status === 'Active' ? 'Deactivate' : 'Activate'}
                           >
-                            {/* Use a pencil icon for the action (edit/toggle) */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.464.263l-4 1a1 1 0 01-1.213-1.213l1-4a1 1 0 01.263-.464l9.9-9.9a2 2 0 012.828 0zM15.121 5.121l-1.414 1.414L13 5.828l1.121-1.121 1-1 1.414 1.414-1 1z" />
+                            {/* Improved edit icon: pencil inside a circle (outline) */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 7.5l-7 7L9 17l2.5-.5 7-7L16.5 7.5z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 6l3 3" />
                             </svg>
                           </button>
                         </div>
