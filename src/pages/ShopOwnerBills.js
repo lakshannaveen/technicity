@@ -17,6 +17,8 @@ const ShopOwnerBills = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingField, setEditingField] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [completedVisibleCount, setCompletedVisibleCount] = useState(10);
+  const [billsVisibleCount, setBillsVisibleCount] = useState(10);
 
   const formatNumberDisplay = (val) => {
     if (val === '' || val === null || typeof val === 'undefined') return '';
@@ -795,7 +797,8 @@ const ShopOwnerBills = () => {
               <p className="text-gray-600">Completed repairs from technicians will appear here.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div>
+              <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -809,7 +812,7 @@ const ShopOwnerBills = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {completedRepairs.map((repair, idx) => (
+                  {completedRepairs.slice(0, completedVisibleCount).map((repair, idx) => (
                     <tr key={repair.id || repair.ticketId || repair.ticket_id || `repair-${idx}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{repair.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -847,6 +850,21 @@ const ShopOwnerBills = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
+              {completedRepairs.length > completedVisibleCount && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setCompletedVisibleCount(c => c + 10)}
+                    aria-label="Load more completed repairs"
+                    className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-full shadow-md hover:from-blue-700 hover:to-blue-600 transition-transform transform hover:-translate-y-0.5"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Load more
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -898,8 +916,9 @@ const ShopOwnerBills = () => {
               }
 
               return (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bill ID</th>
@@ -912,7 +931,7 @@ const ShopOwnerBills = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filtered.map((bill, idx) => (
+                      {(searchQuery ? filtered : filtered.slice(0, billsVisibleCount)).map((bill, idx) => (
                         <tr key={`bill-${bill.id || bill.ticketId || bill.ticket_id || bill.repairId || bill.pass || idx}`}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {bill.ticketId ? String(bill.ticketId) : (bill.id ? (Number.isFinite(Number(bill.id)) ? `BILL-${String(Number(bill.id)).padStart(4, '0')}` : String(bill.id)) : '—')}
@@ -970,6 +989,21 @@ const ShopOwnerBills = () => {
                       ))}
                     </tbody>
                   </table>
+                  </div>
+                  {!searchQuery && filtered.length > billsVisibleCount && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => setBillsVisibleCount(c => c + 10)}
+                        aria-label="Load more bills"
+                        className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-full shadow-md hover:from-blue-700 hover:to-blue-600 transition-transform transform hover:-translate-y-0.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Load more
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })()
