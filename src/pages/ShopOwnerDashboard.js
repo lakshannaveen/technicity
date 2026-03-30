@@ -663,6 +663,7 @@ import { Link } from 'react-router-dom';
 import UserService from '../services/UserService';
 import SupplierInventoryChart from '../components/ui/SupplierInventoryChart';
 import CustomerBillService from '../services/CustomerBillService';
+import { FaMoneyBillWave, FaCalendarAlt, FaChartBar, FaBullseye, FaChartLine, FaReceipt } from 'react-icons/fa';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -961,7 +962,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Today's Bills</h3>
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-lg">💰</span>
+                <FaMoneyBillWave className="text-blue-600" size={20} />
               </div>
             </div>
             <div className="mt-2 flex items-baseline justify-between">
@@ -983,7 +984,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Bills by Date</h3>
               <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                <span className="text-indigo-600 text-lg">📅</span>
+                <FaCalendarAlt className="text-indigo-600" size={18} />
               </div>
             </div>
             <div className="mt-2 flex items-center space-x-2">
@@ -1008,7 +1009,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Monthly Bills</h3>
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-lg">📊</span>
+                <FaChartBar className="text-green-600" size={18} />
               </div>
             </div>
             <div className="flex space-x-2 mb-3">
@@ -1039,7 +1040,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Yearly Bills</h3>
               <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                <span className="text-yellow-600 text-lg">🎯</span>
+                <FaBullseye className="text-yellow-600" size={18} />
               </div>
             </div>
             <input type="number" value={yearlyYear} onChange={(e) => setYearlyYear(e.target.value)} className="w-full mb-3 border border-gray-200 rounded-lg px-3 py-2 text-sm" min="2000" max="2099" />
@@ -1065,7 +1066,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-800">Repair Status Distribution</h2>
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 text-lg">📈</span>
+                <FaChartLine className="text-blue-600" size={18} />
               </div>
             </div>
             <div className="flex flex-col md:flex-row items-center gap-6">
@@ -1102,7 +1103,7 @@ const ShopOwnerDashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-gray-800">Customer Bills Distribution</h2>
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <span className="text-green-600 text-lg">🧾</span>
+                <FaReceipt className="text-green-600" size={18} />
               </div>
             </div>
             <div className="flex flex-col md:flex-row items-center gap-6">
@@ -1146,7 +1147,7 @@ const ShopOwnerDashboard = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-800">Quick Actions</h2>
             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-lg">⚡</span>
+              <FaChartLine className="text-gray-600" size={18} />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
