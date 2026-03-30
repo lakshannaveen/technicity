@@ -496,9 +496,196 @@ const AvailableRepairs = () => {
     }
   };
 
-  // ⚠️ KEEP YOUR ORIGINAL CLAIM FUNCTION HERE (UNCHANGED)
+  // Server-backed claim handler: resolve repairman and call API to claim ticket
   const claimRepair = async (ticketId) => {
-    alert("Use your existing claimRepair function here");
+    // Resolve rep name from session or server
+    const rawUser = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+    let repName = '';
+    try {
+      const mobile = (rawUser.phone || rawUser.mobile || rawUser.MobileNo || rawUser.Mobile || rawUser.mobileNo || '').toString().replace(/\D/g, '');
+      if (mobile) {
+        try {
+          const roleRes = await UserService.testGetUserRole(mobile);
+          if (roleRes && roleRes.data) {
+            const maybe = (roleRes.data.ResultSet && roleRes.data.ResultSet[0]) || roleRes.data.Result || roleRes.data;
+            const maybeName = (maybe && (maybe.UserName || maybe.User || maybe.name || maybe.displayName || maybe.fullName)) || '';
+            if (maybeName) repName = String(maybeName).trim();
+          }
+        } catch (e) {
+          // ignore and fall back
+        }
+      }
+    } catch (e) { /* ignore */ }
+
+    if (!repName) repName = (rawUser.displayName || rawUser.UserName || rawUser.username || rawUser.name || rawUser.fullName || '').toString().trim();
+    if (!repName) repName = 'unknown';
+
+    // Persist rep_name for other pages
+    try {
+      const stored = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user') || '{}');
+      if (repName && stored) {
+        stored.UserName = stored.UserName || repName;
+        stored.displayName = stored.displayName || repName;
+        stored.username = stored.username || repName;
+        try { sessionStorage.setItem('rep_name', repName); } catch (e) { /* ignore */ }
+        try { localStorage.setItem('rep_name', repName); } catch (e) { /* ignore */ }
+        sessionStorage.setItem('user', JSON.stringify(stored));
+      }
+    } catch (e) { /* ignore */ }
+
+    // Helper to parse integer IDs safely
+    const MAX_INT32 = 2147483647;
+    const normalizeToInt = (v) => {
+      if (v === undefined || v === null) return null;
+      const digits = String(v).replace(/[^0-9\-]/g, '');
+      if (digits === '') return null;
+      const n = parseInt(digits, 10);
+      if (Number.isNaN(n)) return null;
+      if (Math.abs(n) > MAX_INT32) return null;
+      return n;
+    };
+
+    // Resolve repairman_id: local cache then server
+    let repairmanId = null;
+    const mobileClean = (rawUser.phone || rawUser.mobile || rawUser.MobileNo || '').toString().replace(/\D/g, '');
+    try {
+      const cached = JSON.parse(localStorage.getItem('repairmen') || '[]');
+      if (Array.isArray(cached) && cached.length > 0) {
+        const found = cached.find(r => {
+          const names = [r.repairman_name, r.name, r.UserName, r.username, r.displayName].filter(Boolean).map(x => String(x).trim().toLowerCase());
+          return names.includes(String(repName).trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobileClean)) || (r.phone && String(r.phone).replace(/\D/g, '') === String(mobileClean));
+        });
+        if (found) {
+          const candidates = [found.RepairmanID, found.RepairmanId, found.repairman_id, found.id];
+          for (const c of candidates) {
+            const n = normalizeToInt(c);
+            if (n) { repairmanId = n; break; }
+          }
+        }
+      }
+    } catch (e) { /* ignore */ }
+
+    if (!repairmanId) {
+      try {
+        const srv = await RepairmanService.GetAllRepairman();
+        let list = [];
+        if (srv && srv.data) {
+          if (Array.isArray(srv.data.ResultSet) && srv.data.ResultSet.length > 0) list = srv.data.ResultSet;
+          else if (srv.data.Result) {
+            try { list = JSON.parse(srv.data.Result); } catch (e) { list = srv.data.Result; }
+          } else if (Array.isArray(srv.data)) list = srv.data;
+        }
+
+        const foundSrv = (list || []).find(r => {
+          const names = [r.repairman_name, r.name, r.UserName, r.username].filter(Boolean).map(x => String(x).trim().toLowerCase());
+          return names.includes(String(repName).trim().toLowerCase()) || (r.repairman_contact && String(r.repairman_contact).replace(/\D/g, '') === String(mobileClean)) || (r.phone && String(r.phone).replace(/\D/g, '') === String(mobileClean));
+        });
+
+        if (foundSrv) {
+          const candidates = [foundSrv.RepairmanID, foundSrv.RepairmanId, foundSrv.repairman_id, foundSrv.id];
+          for (const c of candidates) {
+            const n = normalizeToInt(c);
+            if (n) { repairmanId = n; break; }
+          }
+        }
+      } catch (e) {
+        console.warn('RepairmanService.GetAllRepairman failed', e);
+      }
+    }
+
+    if (!repairmanId) {
+      alert(`Could not resolve a valid repairman_id for '${repName}'. Please ensure your account is listed as a repairman.`);
+      return;
+    }
+
+    // Call UpdateRepairmanName
+    try {
+      const nameParams = new URLSearchParams();
+      nameParams.append('ticket_id', String(ticketId));
+      nameParams.append('repairman_id', String(repairmanId));
+
+      const nameRes = await api.post('/RepairTicket/UpdateRepairmanName', nameParams.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      if (!(nameRes && (nameRes.status === 200 || (nameRes.data && (nameRes.data.StatusCode === 200 || nameRes.data.status === 'success'))))) {
+        const serverMsg = nameRes && nameRes.data ? (nameRes.data.Result || JSON.stringify(nameRes.data)) : 'Unexpected server response';
+        alert(`UpdateRepairmanName failed: ${serverMsg}`);
+        return;
+      }
+    } catch (err) {
+      let serverDetail = '';
+      if (err && err.response && err.response.data) {
+        const d = err.response.data;
+        serverDetail = d.Result || d.message || JSON.stringify(d);
+      } else if (err && err.message) {
+        serverDetail = err.message;
+      }
+      console.error('UpdateRepairmanName failed:', serverDetail || err);
+      alert(`Failed to assign repairman: ${serverDetail || 'Unknown error'}`);
+      return;
+    }
+
+    // Update status to Diagnosing
+    try {
+      const assignedDate = new Date().toISOString().split('T')[0];
+      const params = new URLSearchParams();
+      params.append('ticket_id', String(ticketId));
+      params.append('status', 'Diagnosing');
+      params.append('repairman_id', String(repairmanId));
+      if (repName) params.append('assignedTo', repName);
+      params.append('assignedDate', assignedDate);
+
+      const res = await api.post('/RepairTicket/UpdateRepairTicketStatus', params.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      if (!(res && (res.status === 200 || (res.data && res.data.StatusCode === 200)))) {
+        const serverMsg = res && res.data ? (res.data.Result || JSON.stringify(res.data)) : 'Unexpected server response';
+        alert(`Server update failed: ${serverMsg}`);
+        return;
+      }
+
+      // reload tickets from server to reflect authoritative DB state
+      const listRes = await api.get('/RepairTicket/GetAllRepairTicket');
+      if (listRes && listRes.data && (listRes.data.StatusCode === 200 || listRes.status === 200)) {
+        let list = [];
+        if (Array.isArray(listRes.data.ResultSet) && listRes.data.ResultSet.length > 0) list = listRes.data.ResultSet;
+        else if (listRes.data.Result) {
+          try { list = JSON.parse(listRes.data.Result); } catch (e) { list = listRes.data.Result; }
+        }
+
+        const normalized = (list || []).map(item => ({
+          id: item.ticket_id || item.TicketID || item.id,
+          brand: item.brand || item.device || item.device_brand || '',
+          issue: item.issue_description || item.issue || '',
+          customerName: item.customer_name || item.customer || '',
+          customerPhone: item.customer_phone || item.customerPhone || '',
+          status: normalizeStatus(item.status || item.Status) || 'Available',
+          repairman_id: item.repairman_id || item.RepairmanID || item.RepairmanId || null,
+          createdAt: item.created_date || item.createdAt || item.created_at || item.date || ''
+        }));
+
+        localStorage.setItem('repairTickets', JSON.stringify(normalized));
+        const availableRepairsData = normalized.filter(t => !t.repairman_id || (t.status || '').toLowerCase() === 'available');
+        setAvailableRepairs(availableRepairsData);
+
+        alert('Repair claimed; repairman and status updated. Tickets refreshed from server.');
+        return;
+      }
+
+      alert('Repair claimed but failed to reload tickets from server.');
+    } catch (err) {
+      let serverDetail = '';
+      if (err && err.response && err.response.data) {
+        const d = err.response.data;
+        serverDetail = d.Result || d.message || JSON.stringify(d);
+      } else if (err && err.message) {
+        serverDetail = err.message;
+      }
+      console.error('UpdateRepairTicketStatus failed:', serverDetail || err);
+      alert(`Server update failed: ${serverDetail || 'Unknown error'}`);
+    }
   };
 
   const filteredRepairs = filterStatus === 'All'
