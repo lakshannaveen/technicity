@@ -423,7 +423,7 @@ const Inventory = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -438,9 +438,28 @@ const Inventory = () => {
                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${qty === 0 ? 'text-red-600' : qty <= LOW_STOCK_THRESHOLD ? 'text-orange-500' : 'text-green-700'}`}>{qty}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Number(p.price || 0).toFixed(2)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{status}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      <button onClick={() => handleOpenAdd(p)} className="text-sm text-blue-600 hover:underline mr-3">Edit</button>
-                      <button onClick={() => handleDeletePart(p.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <button
+                          onClick={() => handleOpenAdd(p)}
+                          aria-label={`Edit part ${p.id}`}
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.862 3.487a2.25 2.25 0 113.183 3.183L7 19l-4 1 1-4 12.862-12.696z" />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeletePart(p.id)}
+                          aria-label={`Delete part ${p.id}`}
+                          className="text-red-600 hover:text-red-800 p-1 rounded"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )})}
