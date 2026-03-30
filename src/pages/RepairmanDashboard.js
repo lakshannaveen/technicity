@@ -41,7 +41,30 @@ const RepairmanDashboard = () => {
       const diagnosingArray = Array.isArray(diagnosing) ? diagnosing : [];
       const returnedArray = Array.isArray(returned) ? returned : [];
 
-      const combined = [...diagnosingArray, ...returnedArray].slice(0, 3);
+      const normalizeStatusLocal = (s) => {
+        const st = (s == null) ? '' : String(s).trim();
+        const low = st.toLowerCase();
+        if (low === 'd' || low.startsWith('diag')) return 'Diagnosing';
+        if (low === 'w') return 'Waiting for Parts';
+        if (low === 'i') return 'In Progress';
+        if (low === 'c') return 'Completed';
+        if (low === 'a' || low === 'approved') return 'Approved';
+        if (low === 'r' || low === 'rejected') return 'Rejected';
+        if (low === 'inprogress' || low === 'in progress') return 'In Progress';
+        if (low.includes('waiting') && low.includes('part')) return 'Waiting for Parts';
+        if (low === 'available' || low === '') return 'Available';
+        return st || '';
+      };
+
+      const combined = [...diagnosingArray, ...returnedArray].map(item => ({
+        id: item.ticket_id || item.TicketID || item.id,
+        brand: item.brand || item.device || item.device_brand || '',
+        issue: item.issue_description || item.issue || '',
+        customerName: item.customer_name || item.customer || '',
+        status: normalizeStatusLocal(item.status || item.Status) || 'Diagnosing',
+        raw: item
+      })).slice(0, 3);
+
       setMyRepairs(combined);
     } catch (error) {
       console.error('Failed to load My Repairs', error);
@@ -257,62 +280,90 @@ const RepairmanDashboard = () => {
     const loadData = async (repairmanId, repName) => {
       setIsLoading(true);
       try {
-    // 🔥 1. FETCH ALL TICKETS FROM API (NO localStorage)
-    const res = await api.get('/RepairTicket/GetAllRepairTicket');
+    // Instead of fetching all tickets, fetch diagnosing + returned tickets
+    // for this repairman (same approach as AssignedRepairs) and merge them.
+    const fetchRobust = async (endpoint) => {
+      let list = [];
+      const username = String(user?.username || '').trim();
+      const repNameLocal = String(resolvedRepName || '').trim();
+      const targets = [];
+      if (repairmanId) targets.push(`repairman_id=${repairmanId}`);
+      if (username) targets.push(`rep_name=${encodeURIComponent(username)}`);
+      if (repNameLocal && repNameLocal !== username) targets.push(`rep_name=${encodeURIComponent(repNameLocal)}`);
+      targets.push('');
 
-    let list = [];
-    if (res?.data?.ResultSet) list = res.data.ResultSet;
-    else if (res?.data?.Result) {
-      try {
-        list = typeof res.data.Result === 'string'
-          ? JSON.parse(res.data.Result)
-          : res.data.Result;
-      } catch {
-        list = res.data.Result;
+      for (const t of targets) {
+        const url = `https://teknicitybackend.dockyardsoftware.com/RepairTicket/${endpoint}${t ? '?' + t : ''}`;
+        try {
+          const res = await api.get(url);
+          let candidate = [];
+          if (res && res.data && (res.status === 200 || res.data.StatusCode === 200)) {
+            if (Array.isArray(res.data.ResultSet)) candidate = res.data.ResultSet;
+            else if (res.data.Result) {
+              try { candidate = JSON.parse(res.data.Result); } catch (e) { candidate = res.data.Result; }
+            } else if (Array.isArray(res.data)) candidate = res.data;
+          }
+          if (Array.isArray(candidate) && candidate.length > 0) { list = candidate; break; }
+        } catch (e) { /* ignore */ }
       }
-    }
+      return list;
+    };
 
-    // 🔥 Normalize data
-    const normalized = (list || []).map(item => ({
-      id: item.ticket_id,
-      brand: item.brand,
-      issue: item.issue_description,
-      customerName: item.customer_name,
-      customerPhone: item.phone_no,
-      status: item.status,
-      repairman_id: item.repairman_id,
-      repName: item.repairman_name,
-      createdAt: item.created_date
-    }));
+    const diagList = await fetchRobust('GetDiagnosingRepairTickets');
+    const retList = await fetchRobust('GetReturnedRepairTickets');
 
-    // ✅ AVAILABLE = repairman_id EMPTY
-    const available = normalized.filter(t =>
-      !t.repairman_id || t.repairman_id === ""
-    );
-
-    // ✅ MY REPAIRS
-    const myRepairsData = normalized.filter(t =>
-      String(t.repairman_id) === String(repairmanId) ||
-      String(t.repName || '').toLowerCase() === String(repName || '').toLowerCase()
-    );
-
-    setAvailableRepairs(available.slice(0, 3));
-    setMyRepairs(myRepairsData.slice(0, 3));
-
-    // 🔥 LOCAL STATS (no API call loop)
-    const completedToday = myRepairsData.filter(t =>
-      t.status === 'C'
-    ).length;
-
-    const waitingForParts = myRepairsData.filter(t =>
-      t.status === 'W'
-    ).length;
-
-    setStats({
-      assignedRepairs: myRepairsData.length,
-      completedToday,
-      waitingForParts
+    const normalizeItem = (item) => ({
+      id: item.ticket_id || item.TicketID || item.id,
+      brand: item.brand || item.device || item.device_brand || '',
+      issue: item.issue_description || item.issue || '',
+      customerName: item.customer_name || item.customer || '',
+      status: normalizeStatus(item.status || item.Status) || 'Diagnosing',
+      createdAt: item.created_date || item.createdAt || item.created_at || item.date || '',
+      raw: item
     });
+
+    const normalizedDiag = (diagList || []).map(normalizeItem);
+    const normalizedRet = (retList || []).map(item => {
+      const n = normalizeItem(item);
+      if (!n.status || String(n.status).trim() === '') n.status = 'Returned';
+      return n;
+    });
+
+    // Merge and dedupe by id — prefer Returned status, otherwise newest createdAt
+    const byId = new Map();
+    const upsert = (it) => {
+      const key = String(it.id || (it.raw && (it.raw.ticket_id || it.raw.TicketID)) || '');
+      if (!key) return;
+      const existing = byId.get(key);
+      if (!existing) { byId.set(key, it); return; }
+      if (String(existing.status) === 'Returned') return;
+      if (String(it.status) === 'Returned') { byId.set(key, it); return; }
+      const ed = existing.createdAt ? new Date(existing.createdAt).getTime() : 0;
+      const nd = it.createdAt ? new Date(it.createdAt).getTime() : 0;
+      if (nd >= ed) { byId.set(key, it); }
+    };
+
+    normalizedDiag.forEach(upsert);
+    normalizedRet.forEach(upsert);
+
+    const merged = Array.from(byId.values());
+    merged.sort((a, b) => {
+      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (da || db) return db - da;
+      const ai = parseInt(String(a.id).replace(/\D/g, ''), 10) || 0;
+      const bi = parseInt(String(b.id).replace(/\D/g, ''), 10) || 0;
+      return bi - ai;
+    });
+
+    // Update dashboard cards
+    setMyRepairs(merged.slice(0, 3));
+
+    // Compute stats from merged list
+    const myRepairsAll = merged.filter(t => String(t.raw?.repairman_id || t.raw?.RepairmanID || t.raw?.repName || '').trim() === String(resolvedRepairmanId || resolvedRepName || '').trim());
+    const completedToday = myRepairsAll.filter(t => t.status === 'Completed' && t.raw && (t.raw.completedAt === new Date().toISOString().split('T')[0] || t.raw.completed_date === new Date().toISOString().split('T')[0]) ).length;
+    const waitingForParts = myRepairsAll.filter(t => t.status === 'Waiting for Parts').length;
+    setStats({ assignedRepairs: myRepairsAll.length, completedToday, waitingForParts });
 
   } catch (err) {
     console.error('LoadData API error:', err);
@@ -718,19 +769,12 @@ const RepairmanDashboard = () => {
                 ) : (
                   <div className="space-y-3">
                     {myRepairs.map(ticket => (
-                      <div key={ticket.id} className={`bg-gray-50 rounded-lg p-4 border-l-4 ${getStatusColor(ticket.status).split(' ')[2]}`}>
+                      <div key={ticket.id} className="bg-gray-50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div>
                             <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
                             <p className="text-sm text-gray-600">{ticket.customerName}</p>
                           </div>
-                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(ticket.status)}`}>
-                            {ticket.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-500">Due: {ticket.estimatedCompletion || 'Not set'}</span>
-                          {/* 'Update' link removed on dashboard cards */}
                         </div>
                       </div>
                     ))}
