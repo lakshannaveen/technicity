@@ -554,12 +554,18 @@ const AgeetWorkPerformingTask = () => {
   };
 
   const updateStatus = async (ticket, newStatus) => {
-    setTickets(prev => prev.map(t => {
-      if (String((t.raw?.ticket_id || t.raw?.TicketID) || t.id) === String((ticket.raw?.ticket_id || ticket.raw?.TicketID) || ticket.id)) {
-        return { ...t, status: newStatus, raw: t.raw ? { ...t.raw, status: newStatus } : { ...(t.raw || {}), status: newStatus } };
-      }
-      return t;
-    }));
+    // If marking completed, remove the ticket from the list so it disappears immediately
+    const matchId = String((ticket.raw?.ticket_id || ticket.raw?.TicketID) || ticket.id);
+    if (newStatus === 'Completed') {
+      setTickets(prev => prev.filter(t => String((t.raw?.ticket_id || t.raw?.TicketID) || t.id) !== matchId));
+    } else {
+      setTickets(prev => prev.map(t => {
+        if (String((t.raw?.ticket_id || t.raw?.TicketID) || t.id) === matchId) {
+          return { ...t, status: newStatus, raw: t.raw ? { ...t.raw, status: newStatus } : { ...(t.raw || {}), status: newStatus } };
+        }
+        return t;
+      }));
+    }
 
     let ticketId = ticket.raw?.ticket_id ;
     const repId = ticket.repairmanId ;
