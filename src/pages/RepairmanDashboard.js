@@ -755,14 +755,25 @@ const RepairmanDashboard = () => {
                   <div className="space-y-3">
                     {availableRepairs.map(ticket => (
                       <div key={ticket.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
-                            <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center shadow-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.72c.12 1.05.35 2.07.69 3.03a2 2 0 0 1-.45 2.11L8.09 11.91a16 16 0 0 0 6 6l1.05-1.05a2 2 0 0 1 2.11-.45c.96.34 1.98.57 3.03.69A2 2 0 0 1 22 16.92z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
+                              <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                            </div>
                           </div>
-                          <button onClick={() => claimRepair(ticket.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                            Claim Repair
-                          </button>
+
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Available</span>
+                            <button onClick={() => claimRepair(ticket.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                              Claim Repair
+                            </button>
+                          </div>
                         </div>
                         <p className="text-sm text-gray-500 line-clamp-2">{ticket.issue}</p>
                       </div>
@@ -794,12 +805,24 @@ const RepairmanDashboard = () => {
                   <div className="space-y-3">
                     {myRepairs.map(ticket => (
                       <div key={ticket.id} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center shadow-sm">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.08 4.18 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.72c.12 1.05.35 2.07.69 3.03a2 2 0 0 1-.45 2.11L8.09 11.91a16 16 0 0 0 6 6l1.05-1.05a2 2 0 0 1 2.11-.45c.96.34 1.98.57 3.03.69A2 2 0 0 1 22 16.92z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
+                              <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                            </div>
+                          </div>
+
                           <div>
-                            <h4 className="font-semibold text-gray-900">{ticket.brand}</h4>
-                            <p className="text-sm text-gray-600">{ticket.customerName}</p>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{ticket.status || 'Diagnosing'}</span>
                           </div>
                         </div>
+                        <p className="text-sm text-gray-500">{ticket.issue}</p>
                       </div>
                     ))}
                   </div>
