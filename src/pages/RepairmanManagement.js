@@ -359,12 +359,11 @@ const RepairmanManagement = () => {
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
-                  <tr>
+                    <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -386,29 +385,19 @@ const RepairmanManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{repairman.specialty}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{repairman.experience}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          (repairman.status === 'Active' || repairman.status === 'Available') ? 'bg-green-100 text-green-800' : 
-                          (repairman.status === 'Inactive' || repairman.status === 'In Progress') ? 'bg-red-100 text-red-800' : 
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {repairman.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex space-x-3">
-                          <button
-                            onClick={() => toggleStatus(repairman.id, repairman.status)}
-                            className={`p-1 rounded-md ${repairman.status === 'Active' ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'}`}
-                            title={repairman.status === 'Active' ? 'Deactivate' : 'Activate'}
-                          >
-                            {/* Improved edit icon: pencil inside a circle (outline) */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 7.5l-7 7L9 17l2.5-.5 7-7L16.5 7.5z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 6l3 3" />
-                            </svg>
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => toggleStatus(repairman.id, repairman.status)}
+                          aria-label={repairman.status === 'Active' ? `Deactivate ${repairman.name}` : `Activate ${repairman.name}`}
+                          className="inline-flex items-center px-2 py-1 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        >
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer ${
+                            (repairman.status === 'Active' || repairman.status === 'Available') ? 'bg-green-100 text-green-800 hover:bg-green-200' : 
+                            (repairman.status === 'Inactive' || repairman.status === 'In Progress') ? 'bg-red-100 text-red-800 hover:bg-red-200' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {repairman.status}
+                          </span>
+                        </button>
                       </td>
                     </tr>
                   ))}
