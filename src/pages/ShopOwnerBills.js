@@ -17,6 +17,7 @@ const ShopOwnerBills = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingField, setEditingField] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [completedSearchQuery, setCompletedSearchQuery] = useState('');
   const [completedVisibleCount, setCompletedVisibleCount] = useState(10);
   const [billsVisibleCount, setBillsVisibleCount] = useState(10);
 
@@ -267,7 +268,6 @@ const ShopOwnerBills = () => {
         fieldValue = Number.isFinite(n) ? n : '';
       }
     }
-
     const updatedBill = {
       ...newBill,
       [name]: fieldValue
@@ -798,73 +798,114 @@ const ShopOwnerBills = () => {
             </div>
           ) : (
             <div>
-              <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Completed Date</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Repair Details</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {completedRepairs.slice(0, completedVisibleCount).map((repair, idx) => (
-                    <tr key={repair.id || repair.ticketId || repair.ticket_id || `repair-${idx}`}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{repair.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{repair.brand} {repair.model}</div>
-                        {repair.imei ? <div className="text-sm text-gray-500">{repair.imei}</div> : null}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{repair.customerName}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{repair.customerPhone || (repair.raw && (repair.raw.phone_no || repair.raw.phone || repair.raw.customer_phone || repair.raw.mobile || repair.raw.msisdn || ''))}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(repair.completedAt || (repair.raw && (repair.raw.completed_date || repair.raw.completedAt || repair.raw.completedOn || repair.raw.completed_on)))}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                        <button
-                          onClick={() => openRepairDetails(repair)}
-                          aria-label={`View repair details ${repair.id}`}
-                          className="text-blue-600 hover:text-blue-800 p-1 rounded-md"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                      </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => openBillForm(repair)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md transition duration-200"
-                          aria-label={`Create bill for ${repair.id}`}
-                        >
-                          Create Bill
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="mb-4 flex items-center space-x-3">
+                <input
+                  type="text"
+                  value={completedSearchQuery}
+                  onChange={(e) => setCompletedSearchQuery(e.target.value)}
+                  placeholder="Search completed repairs "
+                  className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setCompletedSearchQuery(''); setCompletedVisibleCount(10); }}
+                  className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
+                >
+                  Clear
+                </button>
               </div>
-              {completedRepairs.length > completedVisibleCount && (
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => setCompletedVisibleCount(c => c + 10)}
-                    aria-label="Load more completed repairs"
-                    className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-full shadow-md hover:from-blue-700 hover:to-blue-600 transition-transform transform hover:-translate-y-0.5"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                    Load more
-                  </button>
-                </div>
-              )}
+              {(() => {
+                const q = String(completedSearchQuery || '').trim().toLowerCase();
+                const filtered = q === '' ? (completedRepairs || []) : (completedRepairs || []).filter(r => {
+                  const id = String(r.id || r.ticketId || r.ticket_id || '').toLowerCase();
+                  const device = String((r.brand || '') + ' ' + (r.model || '')).toLowerCase();
+                  const name = String(r.customerName || r.customer || '').toLowerCase();
+                  const phone = String(r.customerPhone || (r.raw && (r.raw.phone_no || r.raw.phone || r.raw.customer_phone || r.raw.mobile || r.raw.msisdn)) || '').toLowerCase();
+                  return id.indexOf(q) !== -1 || device.indexOf(q) !== -1 || name.indexOf(q) !== -1 || phone.indexOf(q) !== -1;
+                });
+
+                if (!filtered || filtered.length === 0) {
+                  return (
+                    <div className="text-center py-8">
+                      <div className="text-3xl mb-4">🔍</div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">No completed repairs match your search</h3>
+                      <p className="text-gray-600">Try a different ticket id, device, customer name or phone number.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Device</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Completed Date</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Repair Details</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filtered.slice(0, completedVisibleCount).map((repair, idx) => (
+                          <tr key={repair.id || repair.ticketId || repair.ticket_id || `repair-${idx}`}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{repair.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{repair.brand} {repair.model}</div>
+                              {repair.imei ? <div className="text-sm text-gray-500">{repair.imei}</div> : null}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{repair.customerName}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{repair.customerPhone || (repair.raw && (repair.raw.phone_no || repair.raw.phone || repair.raw.customer_phone || repair.raw.mobile || repair.raw.msisdn || ''))}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(repair.completedAt || (repair.raw && (repair.raw.completed_date || repair.raw.completedAt || repair.raw.completedOn || repair.raw.completed_on)))}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                              <button
+                                onClick={() => openRepairDetails(repair)}
+                                aria-label={`View repair details ${repair.id}`}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded-md"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
+                            </td>
+
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => openBillForm(repair)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md transition duration-200"
+                                aria-label={`Create bill for ${repair.id}`}
+                              >
+                                Create Bill
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    </div>
+                    {!completedSearchQuery && filtered.length > completedVisibleCount && (
+                      <div className="mt-4 text-center">
+                        <button
+                          onClick={() => setCompletedVisibleCount(c => c + 10)}
+                          aria-label="Load more completed repairs"
+                          className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-full shadow-md hover:from-blue-700 hover:to-blue-600 transition-transform transform hover:-translate-y-0.5"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                          Load more
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -882,7 +923,7 @@ const ShopOwnerBills = () => {
             />
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
+              onClick={() => { setSearchQuery(''); setBillsVisibleCount(10); }}
               className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm"
             >
               Clear
