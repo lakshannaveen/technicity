@@ -30,6 +30,7 @@ import SupplierReceipts from './pages/SupplierReceipts';
 import ShopOwnerLayout from './components/ShopOwnerLayout';
 import RepairmanLayout from './components/RepairmanLayout';
 import SupplierLayout from './components/SupplierLayout';
+import ScrollToTop from './components/ScrollToTop';
 
 // Sample data initialization removed to avoid seeding demo login/users.
 // If you want to restore sample data for development, re-add a lightweight initializer here or call an external seed script.
@@ -101,6 +102,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="App">
         <Routes>
           <Route path="/login" element={<SimpleLogin />} />
