@@ -72,6 +72,7 @@ const ShopOwnerLayout = ({ children }) => {
   ];
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setMobileOpen(false); };
@@ -96,17 +97,35 @@ const ShopOwnerLayout = ({ children }) => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-slate-100">
-      {/* Sidebar */}
-      <div className="hidden md:flex md:w-64 md:flex-col">
+      {/* Sidebar (collapsible to icons-only) */}
+      <div className={`hidden md:flex md:flex-col ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         <div className="flex flex-col flex-grow pt-6 overflow-y-auto bg-white/90 backdrop-blur border-r border-slate-200">
-          <div className="flex items-center flex-shrink-0 px-5">
-            <div className="h-9 w-9 rounded-xl bg-blue-600/10 text-blue-700 flex items-center justify-center mr-3">
-              <FiTool className="h-4 w-4" aria-hidden />
-            </div>
-            <h1 className="text-lg font-semibold text-slate-900 tracking-tight">{siteTitle}</h1>
+          <div className="flex items-center flex-shrink-0 px-4">
+            {!sidebarCollapsed && (
+              <div className={`h-9 w-9 rounded-xl bg-blue-600/10 text-blue-700 flex items-center justify-center mr-3`}>
+                <FiTool className="h-4 w-4" aria-hidden />
+              </div>
+            )}
+            {!sidebarCollapsed && <h1 className="text-lg font-semibold text-slate-900 tracking-tight">{siteTitle}</h1>}
+            <button
+              onClick={() => setSidebarCollapsed((s) => !s)}
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="ml-auto p-2 rounded-md text-slate-500 hover:bg-slate-100"
+            >
+              {sidebarCollapsed ? (
+                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              )}
+            </button>
           </div>
+
           <div className="mt-6 flex-grow flex flex-col">
-            <nav className="flex-1 px-3 pb-6 space-y-1">
+            <nav className="flex-1 px-2 pb-6 space-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 const Icon = item.icon;
@@ -114,41 +133,52 @@ const ShopOwnerLayout = ({ children }) => {
                   <Link
                     key={item.name}
                     to={item.href}
+                    title={item.name}
+                    aria-label={item.name}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 border ${
+                    className={`group flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3 px-3'} px-1 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 border ${
                       isActive
                         ? 'bg-blue-50 text-blue-700 border-blue-100 shadow-sm'
                         : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border-transparent'
                     }`}
                   >
                     <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-500 group-hover:text-blue-600'}`} aria-hidden />
-                    <span className="truncate">{item.name}</span>
+                    {!sidebarCollapsed && <span className="truncate">{item.name}</span>}
                   </Link>
                 );
               })}
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-slate-200 p-4">
-            <div className="w-full flex justify-center">
-              <div className="flex flex-col items-center space-y-2">
+
+          <div className="flex-shrink-0 flex border-t border-slate-200 p-3">
+            <div className={`w-full ${sidebarCollapsed ? 'flex items-center justify-center' : 'flex justify-center'}`}>
+              <div className={`flex ${sidebarCollapsed ? '' : 'flex-col items-center space-y-2'}`}>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-slate-800">{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
-                  <p className="text-xs font-medium text-slate-500">Shop Owner</p>
+                  <p className={`text-sm font-medium text-slate-800 ${sidebarCollapsed ? 'sr-only' : ''}`}>{displayName || (user.username && !(/^user\d{2,}$/.test(user.username)) ? user.username : '')}</p>
+                  {!sidebarCollapsed && <p className="text-xs font-medium text-slate-500">Shop Owner</p>}
                 </div>
 
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={handleLogoutClick}
-                    className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition"
-                    title="Logout (destructive)"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h6a1 1 0 110 2H5v10h5a1 1 0 110 2H4a1 1 0 01-1-1V4z" clipRule="evenodd" />
-                      <path d="M9 7a1 1 0 011-1h4.586l-1.293-1.293a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L14.586 9H10a1 1 0 01-1-1z" />
+                {!sidebarCollapsed ? (
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={handleLogoutClick}
+                      className="inline-flex items-center gap-2 text-sm bg-red-600 text-white px-3 py-1.5 rounded-md hover:bg-red-700 transition"
+                      title="Logout (destructive)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h6a1 1 0 110 2H5v10h5a1 1 0 110 2H4a1 1 0 01-1-1V4z" clipRule="evenodd" />
+                        <path d="M9 7a1 1 0 011-1h4.586l-1.293-1.293a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L14.586 9H10a1 1 0 01-1-1z" />
+                      </svg>
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={handleLogoutClick} className="p-2 rounded-md text-slate-600 hover:bg-slate-100" title="Logout">
+                    <svg className="h-4 w-4 text-slate-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7" />
                     </svg>
-                    <span>Logout</span>
                   </button>
-                </div>
+                )}
               </div>
             </div>
           </div>
