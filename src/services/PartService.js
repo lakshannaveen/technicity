@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
  
 const GetAllParts = async () => {
     let config = {
@@ -6,7 +6,7 @@ const GetAllParts = async () => {
         url: '/Part/GetAllParts',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const GetPartByID = async () => {
@@ -15,7 +15,7 @@ const GetPartByID = async () => {
         url: '/Part/GetPartByID',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const AddPart = async () => {
@@ -24,7 +24,7 @@ const AddPart = async () => {
         url: '/Part/AddPart',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const UpdatePart = async () => {
@@ -33,7 +33,7 @@ const UpdatePart = async () => {
         url: '/Part/UpdatePart',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const DeletePart = async () => {
@@ -42,7 +42,7 @@ const DeletePart = async () => {
         url: '/Part/DeletePart',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 const PartService = {
     GetAllParts,

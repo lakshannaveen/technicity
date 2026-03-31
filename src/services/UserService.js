@@ -1,15 +1,15 @@
-import api from './api';
+import axios from 'axios';
 
-const login = async (email, password) => api.post('/User/Login', { email, password });
+const login = async (email, password) => axios.post('/User/Login', { email, password });
 
-const signup = async (name, email, phone, password, role) => api.post('/User/Signup', { name, email, phone, password, role });
+const signup = async (name, email, phone, password, role) => axios.post('/User/Signup', { name, email, phone, password, role });
 
-const verifyOtp = async (phone, otp_code) => api.post('/User/VerifyOtp', { phone, otp_code });
+const verifyOtp = async (phone, otp_code) => axios.post('/User/VerifyOtp', { phone, otp_code });
 
-const resendOtp = async (phone) => api.get('/Login/SendOtp', { params: { MobileNo: phone } });
+const resendOtp = async (phone) => axios.get('/Login/SendOtp', { params: { MobileNo: phone } });
 
 // Send OTP using legacy Login controller endpoint (returns Result and optionally ResultSet with demo otp)
-const sendOtp = async (mobileNo) => api.get('/Login/SendOtp', { params: { MobileNo: mobileNo } });
+const sendOtp = async (mobileNo) => axios.get('/Login/SendOtp', { params: { MobileNo: mobileNo } });
 
 // TestGetUserRole - returns the role for a given mobile number
 // Add simple in-memory caching and request deduplication to avoid repeated
@@ -34,7 +34,7 @@ const testGetUserRole = async (mobileNo) => {
 	if (_rolePromises[key]) return _rolePromises[key];
 
 	// otherwise start a request and cache the promise
-	const p = api.get('/Login/TestGetUserRole', { params: { mobileNo: key } })
+	const p = axios.get('/Login/TestGetUserRole', { params: { mobileNo: key } })
 		.then((res) => {
 			try {
 				_roleCache[key] = { expires: Date.now() + TTL, value: res };
@@ -54,7 +54,7 @@ const testGetUserRole = async (mobileNo) => {
 };
 
 // Add new user (Admin creation uses Login/AddUser endpoint as provided)
-const addUser = async (userPayload) => api.post('/Login/AddUser', userPayload);
+const addUser = async (userPayload) => axios.post('/Login/AddUser', userPayload);
 
 // Some legacy MVC controllers expect form-encoded data. Provide a form-encoded variant.
 const addUserForm = async (userPayload) => {
@@ -63,7 +63,7 @@ const addUserForm = async (userPayload) => {
 		const v = userPayload[k];
 		if (v !== undefined && v !== null) params.append(k, String(v));
 	});
-	return api.request({
+	return axios.request({
 		method: 'post',
 		url: '/Login/AddUser',
 		data: params.toString(),

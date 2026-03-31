@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
  
 const GetAllRepairman = async () => {
     let config = {
@@ -6,7 +6,7 @@ const GetAllRepairman = async () => {
         url: '/Repairman/GetAllRepairman',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const GetRepairmanByID = async () => {
@@ -15,7 +15,7 @@ const GetRepairmanByID = async () => {
         url: '/Repairman/GetRepairmanByID',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const AddRepairman = async (repairmanData) => {
@@ -25,7 +25,7 @@ const AddRepairman = async (repairmanData) => {
         data: repairmanData
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const UpdateRepairman = async (data) => {
@@ -35,7 +35,7 @@ const UpdateRepairman = async (data) => {
         data: data
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const DeleteRepairman = async () => {
@@ -44,7 +44,7 @@ const DeleteRepairman = async () => {
         url: '/Repairman/DeleteRepairman',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 const RepairmanService = {
     GetAllRepairman,

@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
  
 const GetAllItems = async () => {
     let config = {
@@ -6,7 +6,7 @@ const GetAllItems = async () => {
         url: '/Item/GetAllItems',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const GetItemByID = async () => {
@@ -15,7 +15,7 @@ const GetItemByID = async () => {
         url: '/Item/GetItemByID',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const AddItem = async () => {
@@ -24,7 +24,7 @@ const AddItem = async () => {
         url: '/Item/AddItem',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const UpdateItem = async () => {
@@ -33,7 +33,7 @@ const UpdateItem = async () => {
         url: '/Item/UpdateItem',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const DeleteItem = async () => {
@@ -42,7 +42,7 @@ const DeleteItem = async () => {
         url: '/Item/DeleteItem',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 const ItemService = {
     GetAllItems,

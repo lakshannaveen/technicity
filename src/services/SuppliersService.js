@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
  
 const GetAllSupplier = async () => {
     let config = {
@@ -6,7 +6,7 @@ const GetAllSupplier = async () => {
         url: '/Supplier/GetAllSupplier',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
  
@@ -16,7 +16,7 @@ const GetSupplierbyId = async () => {
         url: '/Supplier/GetSupplierbyId',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const AddSupplier = async () => {
@@ -25,7 +25,7 @@ const AddSupplier = async () => {
         url: '/Supplier/AddSupplier',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const UpdateSupplier = async () => {
@@ -34,7 +34,7 @@ const UpdateSupplier = async () => {
         url: '/Supplier/UpdateSupplier',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const DeleteSupplier = async () => {
@@ -43,7 +43,7 @@ const DeleteSupplier = async () => {
         url: '/Supplier/DeleteSupplier',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
  
 const SuppliersService = {

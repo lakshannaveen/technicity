@@ -1,4 +1,4 @@
-import api from './api';
+import axios from 'axios';
  
 const GetAllCustomers = async () => {
     let config = {
@@ -6,7 +6,7 @@ const GetAllCustomers = async () => {
         url: '/Customer/GetAllCustomers',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 
 const GetCustomerByID = async () => {
@@ -15,7 +15,7 @@ const GetCustomerByID = async () => {
         url: '/Customer/GetCustomerByID',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
  
 const AddCustomers = async () => {
@@ -24,7 +24,7 @@ const AddCustomers = async () => {
         url: '/Customer/AddCustomers',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
  
 const UpdateCustomers = async () => {
@@ -33,7 +33,7 @@ const UpdateCustomers = async () => {
         url: '/Customer/UpdateCustomers',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
  
 const DeleteCustomers = async () => {
@@ -42,7 +42,7 @@ const DeleteCustomers = async () => {
         url: '/Customer/DeleteCustomers',
     };
    
-    return api.request(config);
+    return axios.request(config);
 };
 const CustomerService = {
     GetAllCustomers,

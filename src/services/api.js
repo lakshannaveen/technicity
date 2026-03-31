@@ -1,14 +1,8 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../config';
 import { normalizeStatusFields, encodeStatusFields } from '../utils/userUtils';
 
-// Single axios instance used across services. Base URL comes from src/config.js
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Use the global axios defaults configured in src/index.js
+const api = axios;
 
 // Determine the status type based on the URL
 const getStatusTypeFromUrl = (url) => {

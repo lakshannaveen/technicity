@@ -1,11 +1,11 @@
-import api from './api';
+import axios from 'axios';
 
 const GetTodayBillCount = async () => {
   const config = {
     method: 'get',
     url: '/CustomerBill/GetTodayBillCount',
   };
-  return api.request(config);
+  return axios.request(config);
 };
 
 const GetBillByDate = async (billDate) => {
@@ -13,7 +13,7 @@ const GetBillByDate = async (billDate) => {
     method: 'get',
     url: `/CustomerBill/GetBillByDate?BillDate=${encodeURIComponent(billDate)}`,
   };
-  return api.request(config);
+  return axios.request(config);
 };
 
 const GetMonthlyBillCount = async (month, year) => {
@@ -21,7 +21,7 @@ const GetMonthlyBillCount = async (month, year) => {
     method: 'get',
     url: `/CustomerBill/GetMonthlyBillCount?Month=${encodeURIComponent(month)}&Year=${encodeURIComponent(year)}`,
   };
-  return api.request(config);
+  return axios.request(config);
 };
 
 const GetYearlyBillCount = async (year) => {
@@ -29,7 +29,7 @@ const GetYearlyBillCount = async (year) => {
     method: 'get',
     url: `/CustomerBill/GetYearlyBillCount?Year=${encodeURIComponent(year)}`,
   };
-  return api.request(config);
+  return axios.request(config);
 };
 
 const CustomerBillService = {
